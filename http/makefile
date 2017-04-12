@@ -17,7 +17,7 @@ LINK_FLAGS = -g  -fPIC
 ## for release
 ## LINK_FLAGS = -s -O3 -shared -fPIC
 
-LIB_DIR = ../../library
+LIB_DIR = ../../../library
 BASE_DIR = ./../pub
 PLUGIN_DIR = ../plugins
 CUSTOM_THIRD_PATH = $(LIB_DIR)/mylib/third_party
