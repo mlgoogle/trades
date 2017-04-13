@@ -46,7 +46,8 @@ bool UsersDB::CheckAccountExist(const std::string& phone) {
 
 bool UsersDB::RegisterAccount(const std::string& phone_num,
                               const std::string& passwd, const int32 type,
-                              int64& uid, int32& result) {
+                              int64& uid, int32& result, const std::string &agentid, 
+				const std::string &recommend, const int64 memberid) {
   bool r = false;
   base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
   base_logic::DictionaryValue *info_value = NULL;
@@ -54,7 +55,10 @@ bool UsersDB::RegisterAccount(const std::string& phone_num,
   int64 big_type = type;
   //call actuals.proc_RegisterAccount('18668169052','1234124123')
   sql = "call proc_RegisterAccount('" + phone_num + "','" + passwd + "',"
-      + base::BasicUtil::StringUtil::Int64ToString(big_type) + ");";
+      + base::BasicUtil::StringUtil::Int64ToString(big_type) 
+      + base::BasicUtil::StringUtil::Int64ToString(memberid) 
+      + ",'" + agentid + "','" + recommend
+      + "');";
 
   base_logic::ListValue *listvalue;
   dict->SetString(L"sql", sql);

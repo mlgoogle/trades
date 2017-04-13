@@ -91,7 +91,10 @@ class RegisterAccount {
         verify_token_(NULL),
         phone_num_(NULL),
         passwd_(NULL),
-        user_type_(NULL) {
+        user_type_(NULL),
+	memberid_(NULL),
+	agentid_(NULL),
+	recommend_(NULL){
   }
 
   ~RegisterAccount() {
@@ -119,6 +122,19 @@ class RegisterAccount {
       delete user_type_;
       user_type_ = NULL;
     }
+
+    if (memberid_) {
+      delete memberid_;
+      memberid_ = NULL;
+    }
+    if (agentid_) {
+      delete agentid_;
+      agentid_ = NULL;
+    }
+    if (recommend_) {
+      delete recommend_;
+      recommend_ = NULL;
+    }
   }
 
   bool set_http_packet(base_logic::DictionaryValue* value);
@@ -142,14 +158,21 @@ class RegisterAccount {
   void set_passwd(std::string& passwd) {
     passwd_ = new base_logic::StringValue(passwd);
   }
-
+  void set_agentid(std::string& agentid) {
+    agentid_ = new base_logic::StringValue(agentid);
+  }
+  void set_recommend(std::string& recommend) {
+    recommend_ = new base_logic::StringValue(recommend);
+  }
+  void set_memberid(int64 memberid) {
+    timestamp_ = new base_logic::FundamentalValue(memberid);
+  }
   std::string verify_code() {
     std::string verify_code;
     if (verify_code_)
       verify_code_->GetAsString(&verify_code);
     return verify_code;
   }
-
   int64 timestamp() {
     int64 timestamp;
     if (timestamp_)
@@ -184,7 +207,28 @@ class RegisterAccount {
       user_type_->GetAsBigInteger(&user_type);
     return user_type;
   }
-
+  
+  std::string agentid() {
+    std::string agentid;
+    if (agentid_)
+      agentid_->GetAsString(&agentid);
+    return agentid;
+  }
+  
+  std::string recommend() {
+    std::string recommend;
+    if (recommend_)
+      recommend_->GetAsString(&recommend);
+    return recommend;
+  }
+  
+  int64 memberid() {
+    int64 memberid;
+    if (memberid_)
+      memberid_->GetAsBigInteger(&memberid);
+    return memberid;
+  }
+  
  private:
   base_logic::StringValue* verify_code_;
   base_logic::FundamentalValue* timestamp_;
@@ -192,6 +236,10 @@ class RegisterAccount {
   base_logic::StringValue* user_type_;
   base_logic::StringValue* phone_num_;
   base_logic::StringValue* passwd_;
+  //modify bytw
+  base_logic::FundamentalValue* memberid_;
+  base_logic::StringValue* agentid_;
+  base_logic::StringValue* recommend_;
 };
 
 class LoginAccount {
