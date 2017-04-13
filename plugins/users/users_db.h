@@ -22,7 +22,7 @@ class UsersDB {
 
  public:
   bool RegisterAccount(const std::string& phone_num, const std::string& passwd,
-                       const int32 type,int64& uid, int32& result);
+                       const int32 type,int64& uid, int32& result, const std::string &agentid, const std::string &recommend, const int64 memberid);
 
   bool LoginAccount(const std::string& phone_num, const std::string& passwd,
                     const std::string& ip, swp_logic::UserInfo& user);
