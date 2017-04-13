@@ -10,7 +10,7 @@
 
 # Where to find user code.
 
-LIB_DIR = /home/tangwei/library
+LIB_DIR = ./../../../library
 USER_DIR = ./../../pub
 SO_DIR = ./../../bin/plugins
 
