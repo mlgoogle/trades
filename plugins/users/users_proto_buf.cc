@@ -75,6 +75,27 @@ bool RegisterAccount::set_http_packet(base_logic::DictionaryValue* value) {
   else
     return false;
 
+  //add bytw
+  std::string tmp;
+  int64 tmp_64;
+  r = value->GetBigInteger(L"memberId", &tmp_64);
+  if (r)
+    set_memberid(tmp_64);
+  else
+    return false;
+
+  r = value->GetString(L"agentId", &tmp);
+  if (r)
+    set_agentid(tmp);
+  else
+    return false;
+
+  r = value->GetString(L"recommend", &tmp);
+  if (r)
+    set_recommend(tmp);
+  else
+    return false;
+  //end 
   return true;
 }
 

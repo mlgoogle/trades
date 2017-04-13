@@ -168,8 +168,13 @@ bool Userslogic::OnRegisterAccount(struct server* srv, int socket,
   int64 uid = 0;
   int32 result = 0;
   //注册数据库
+  //
   r = user_db_->RegisterAccount(register_account.phone_num(),
-                                register_account.passwd(), 0, uid, result);
+                                register_account.passwd(), 0, uid, result,
+				register_account.agentid(), 
+				register_account.recommend(),
+				register_account.memberid());
+				//
   if (!r || result == 0) {  //用户已经存在
     send_error(socket, ERROR_TYPE, NO_USER_EXIST, packet->session_id);
     return false;
