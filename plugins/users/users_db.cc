@@ -55,7 +55,7 @@ bool UsersDB::RegisterAccount(const std::string& phone_num,
   int64 big_type = type;
   //call actuals.proc_RegisterAccount('18668169052','1234124123')
   sql = "call proc_RegisterAccount('" + phone_num + "','" + passwd + "',"
-      + base::BasicUtil::StringUtil::Int64ToString(big_type) 
+      + base::BasicUtil::StringUtil::Int64ToString(big_type)  + ","
       + base::BasicUtil::StringUtil::Int64ToString(memberid) 
       + ",'" + agentid + "','" + recommend
       + "');";

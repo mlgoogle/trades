@@ -165,7 +165,7 @@ class RegisterAccount {
     recommend_ = new base_logic::StringValue(recommend);
   }
   void set_memberid(int64 memberid) {
-    timestamp_ = new base_logic::FundamentalValue(memberid);
+    memberid_ = new base_logic::FundamentalValue(memberid);
   }
   std::string verify_code() {
     std::string verify_code;
