@@ -80,7 +80,7 @@ bool RegisterAccount::set_http_packet(base_logic::DictionaryValue* value) {
   int64 tmp_64;
   r = value->GetBigInteger(L"memberId", &tmp_64);
   if (r)
-    set_memberid(tmp_64);
+    set_member_id(tmp_64);
   else
     return false;
 
@@ -93,6 +93,11 @@ bool RegisterAccount::set_http_packet(base_logic::DictionaryValue* value) {
   r = value->GetString(L"recommend", &tmp);
   if (r)
     set_recommend(tmp);
+  else
+    return false;
+  r = value->GetString(L"deviceId", &tmp);
+  if (r)
+    set_device_id(tmp);
   else
     return false;
   //end 
@@ -127,6 +132,8 @@ bool LoginAccount::set_http_packet(base_logic::DictionaryValue* value) {
   std::string passwd;
   std::string phone_num;
   std::string token;
+  std::string device_id;
+
 
   if (value == NULL)
     return false;
@@ -143,6 +150,11 @@ bool LoginAccount::set_http_packet(base_logic::DictionaryValue* value) {
   else
     return false;
 
+  r = value->GetString(L"deviceId", &device_id);
+  if (r)
+    set_device_id(device_id);
+  else
+    return false;
   /*if (phone_num.length() < 11) {
    LOG_ERROR("phone is wrong");
    err = PHONE_NUM_ERR;

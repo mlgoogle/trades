@@ -47,7 +47,8 @@ bool UsersDB::CheckAccountExist(const std::string& phone) {
 bool UsersDB::RegisterAccount(const std::string& phone_num,
                               const std::string& passwd, const int32 type,
                               int64& uid, int32& result, const std::string &agentid, 
-				const std::string &recommend, const int64 memberid) {
+			      const std::string &recommend, const std::string &device_id, 
+			      const int64 member_id) {
   bool r = false;
   base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
   base_logic::DictionaryValue *info_value = NULL;
@@ -56,8 +57,8 @@ bool UsersDB::RegisterAccount(const std::string& phone_num,
   //call actuals.proc_RegisterAccount('18668169052','1234124123')
   sql = "call proc_RegisterAccount('" + phone_num + "','" + passwd + "',"
       + base::BasicUtil::StringUtil::Int64ToString(big_type)  + ","
-      + base::BasicUtil::StringUtil::Int64ToString(memberid) 
-      + ",'" + agentid + "','" + recommend
+      + base::BasicUtil::StringUtil::Int64ToString(member_id) 
+      + ",'" + agentid + "','" + recommend + "','" + device_id 
       + "');";
 
   base_logic::ListValue *listvalue;
@@ -109,15 +110,15 @@ bool UsersDB::GetUserInfo(const int64 uid, const std::string& ip,
 }
 
 bool UsersDB::LoginAccount(const std::string& phone_num,
-                           const std::string& passwd, const std::string& ip,
-                           swp_logic::UserInfo& user) {
+                           const std::string& passwd, const std::string &device_id,
+			   const std::string& ip, swp_logic::UserInfo& user) {
   bool r = false;
   base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
   base_logic::DictionaryValue *info_value = NULL;
   std::string sql;
 
   //call actuals.proc_LoginAccount('18668169052','4bcf73028a526f5ae6899759ab332c3d3b173855bef3b22b19224cd5233d39c0','127.0,0.1')
-  sql = "call proc_LoginAccount('" + phone_num + "','" + passwd + "','" + ip
+  sql = "call proc_LoginAccount('" + phone_num + "','" + passwd + "','"+ device_id + "','" + ip
       + "')";
 
   base_logic::ListValue *listvalue;

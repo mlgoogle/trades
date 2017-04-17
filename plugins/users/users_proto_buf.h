@@ -92,9 +92,10 @@ class RegisterAccount {
         phone_num_(NULL),
         passwd_(NULL),
         user_type_(NULL),
-	memberid_(NULL),
+	member_id_(NULL),
 	agentid_(NULL),
-	recommend_(NULL){
+	recommend_(NULL),
+	device_id_(NULL){
   }
 
   ~RegisterAccount() {
@@ -123,9 +124,9 @@ class RegisterAccount {
       user_type_ = NULL;
     }
 
-    if (memberid_) {
-      delete memberid_;
-      memberid_ = NULL;
+    if (member_id_) {
+      delete member_id_;
+      member_id_ = NULL;
     }
     if (agentid_) {
       delete agentid_;
@@ -134,6 +135,10 @@ class RegisterAccount {
     if (recommend_) {
       delete recommend_;
       recommend_ = NULL;
+    }
+    if (device_id_) {
+      delete device_id_;
+      device_id_= NULL;
     }
   }
 
@@ -164,8 +169,11 @@ class RegisterAccount {
   void set_recommend(std::string& recommend) {
     recommend_ = new base_logic::StringValue(recommend);
   }
-  void set_memberid(int64 memberid) {
-    memberid_ = new base_logic::FundamentalValue(memberid);
+  void set_device_id(std::string& device_id) {
+    device_id_ = new base_logic::StringValue(device_id);
+  }
+  void set_member_id(int64 member_id) {
+    member_id_ = new base_logic::FundamentalValue(member_id);
   }
   std::string verify_code() {
     std::string verify_code;
@@ -214,6 +222,12 @@ class RegisterAccount {
       agentid_->GetAsString(&agentid);
     return agentid;
   }
+  std::string device_id() {
+    std::string device_id;
+    if (device_id_)
+      device_id_->GetAsString(&device_id);
+    return device_id;
+  }
   
   std::string recommend() {
     std::string recommend;
@@ -222,11 +236,11 @@ class RegisterAccount {
     return recommend;
   }
   
-  int64 memberid() {
-    int64 memberid;
-    if (memberid_)
-      memberid_->GetAsBigInteger(&memberid);
-    return memberid;
+  int64 member_id() {
+    int64 member_id;
+    if (member_id_)
+      member_id_->GetAsBigInteger(&member_id);
+    return member_id;
   }
   
  private:
@@ -237,16 +251,18 @@ class RegisterAccount {
   base_logic::StringValue* phone_num_;
   base_logic::StringValue* passwd_;
   //modify bytw
-  base_logic::FundamentalValue* memberid_;
+  base_logic::FundamentalValue* member_id_;
   base_logic::StringValue* agentid_;
   base_logic::StringValue* recommend_;
+  base_logic::StringValue* device_id_;
 };
 
 class LoginAccount {
  public:
   LoginAccount()
       : phone_num_(NULL),
-        passwd_(NULL) {
+        passwd_(NULL),
+	device_id_(NULL){
   }
 
   ~LoginAccount() {
@@ -257,6 +273,10 @@ class LoginAccount {
     if (passwd_) {
       delete passwd_;
       passwd_ = NULL;
+    }
+    if (device_id_) {
+      delete device_id_;
+      device_id_= NULL;
     }
 
   }
@@ -269,6 +289,9 @@ class LoginAccount {
 
   void set_passwd(std::string& passwd) {
     passwd_ = new base_logic::StringValue(passwd);
+  }
+  void set_device_id(std::string& device_id) {
+    device_id_ = new base_logic::StringValue(device_id);
   }
 
   const std::string phone_num() const {
@@ -284,10 +307,17 @@ class LoginAccount {
       passwd_->GetAsString(&passwd);
     return passwd;
   }
+  const std::string device_id() const {
+    std::string device_id;
+    if (device_id_)
+      device_id_->GetAsString(&device_id);
+    return device_id;
+  }
 
  private:
   base_logic::StringValue* phone_num_;
   base_logic::StringValue* passwd_;
+  base_logic::StringValue* device_id_;
 
 };
 
