@@ -173,7 +173,8 @@ bool Userslogic::OnRegisterAccount(struct server* srv, int socket,
                                 register_account.passwd(), 0, uid, result,
 				register_account.agentid(), 
 				register_account.recommend(),
-				register_account.memberid());
+				register_account.device_id(),
+				register_account.member_id());
 				//
   if (!r || result == 0) {  //用户已经存在
     send_error(socket, ERROR_TYPE, NO_USER_EXIST, packet->session_id);
@@ -250,7 +251,7 @@ bool Userslogic::OnLoginAccount(struct server* srv, int socket,
 
   swp_logic::UserInfo userinfo;
   r = user_db_->LoginAccount(login_account.phone_num(), login_account.passwd(),
-                             ip, userinfo);
+                             login_account.device_id(), ip, userinfo);
   if (!r || userinfo.uid() == 0) {
     send_error(socket, ERROR_TYPE, NO_PASSWORD_ERRNOR, packet->session_id);
     return false;
