@@ -127,6 +127,13 @@ int32 TradesManager::OpenPosition(swp_logic::TradesPosition& trades_position) {
                                  good_info);
     if (!r)
       return NO_HAVE_TRADES_GOODS;
+    // add bytw
+    USER_TRADES_MAP::iterator user_trades_it = trades_cache_->user_trades_map_
+      .find(trades_position.uid());
+    if (user_trades_it != trades_cache_->user_trades_map_.end() 
+        && user_trades_it->second.size() >= RECORD_MAX)
+      return RECORD_TOO_LARGE;	
+    //end add bytw
   }
   swp_logic::Quotations quotation;
   trades_position.set_open_position_time(time(NULL));
