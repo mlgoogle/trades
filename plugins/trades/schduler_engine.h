@@ -9,6 +9,7 @@
 #include "trades/trades_info.h"
 #include "thread/base_thread_handler.h"
 #include "thread/base_thread_lock.h"
+#define RECORD_MAX 5
 
 typedef std::map<int32, trades_logic::GoodsInfo> GOODS_MAP;
 typedef std::map<int32, GOODS_MAP> PLAT_GOODS_MAP; /*对应平台能交易的商品*/
