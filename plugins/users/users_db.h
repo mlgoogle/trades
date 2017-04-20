@@ -25,8 +25,15 @@ class UsersDB {
                        const int32 type,int64& uid, int32& result, const std::string &agentid, const std::string &recommend, 
 		       const std::string &device_id, const int64 member_id);
 
+  bool WXBindAccount(const std::string& phone_num, const std::string& passwd,
+                       const int32 type,int64& uid, int32& result, const std::string &openid, const std::string &nick_name, 
+		       const std::string &head_url, const std::string &agent_id, const std::string &recommend,
+		       const std::string &device_id, const int64 member_id);
+
   bool LoginAccount(const std::string& phone_num, const std::string& passwd, const std::string& device_id,
                     const std::string& ip, swp_logic::UserInfo& user);
+  bool LoginWiXin(const std::string& open_id, const std::string& device_id,
+                    const std::string& ip, swp_logic::UserInfo& user, std::string &passwd);
 
   bool CheckAccountExist(const std::string& phone);
 

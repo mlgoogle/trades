@@ -110,6 +110,14 @@ bool Userslogic::OnUsersMessage(struct server *srv, const int socket,
       OnRegisterVerifycode(srv, socket, packet);
       break;
     }
+    case R_WX_LOGIN:{
+      OnLoginWiXin(srv, socket, packet);
+      break;
+    }
+    case R_WX_BIND_ACCOUNT:{
+      OnWXBindAccount(srv, socket, packet);
+      break;
+    }
     default:
       break;
   }
@@ -194,6 +202,55 @@ bool Userslogic::OnRegisterAccount(struct server* srv, int socket,
   return true;
 }
 
+
+bool Userslogic::OnWXBindAccount(struct server* srv, int socket,
+                                   struct PacketHead *packet) {
+  users_logic::net_request::WXBindAccount wx_bind_account;
+  if (packet->packet_length <= PACKET_HEAD_LENGTH) {
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
+    return false;
+  }
+  struct PacketControl* packet_control = (struct PacketControl*) (packet);
+  bool r = wx_bind_account.set_http_packet(packet_control->body_);
+  if (!r) {
+    LOG_DEBUG2("packet_length %d",packet->packet_length);
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
+    return false;
+  }
+
+  int64 uid = 0;
+  int32 result = 0;
+  //注册数据库
+  //
+  
+  r = user_db_->WXBindAccount(wx_bind_account.phone_num(),
+                                wx_bind_account.passwd(), 0, uid, result,
+				wx_bind_account.openid(), 
+				wx_bind_account.nick_name(),
+				wx_bind_account.head_url(),
+				wx_bind_account.agentid(),
+				wx_bind_account.recommend(),
+				wx_bind_account.device_id(),
+				wx_bind_account.member_id());
+				//
+  if (!r || result == 0) {  //用户已经存在
+    send_error(socket, ERROR_TYPE, NO_USER_EXIST, packet->session_id);
+    return false;
+  }
+
+  //返回绑定信息
+  users_logic::net_reply::RegisterAccount net_register_account;
+  net_register_account.set_result(1);
+  net_register_account.set_uid(uid);
+
+  struct PacketControl net_packet_control;
+  MAKE_HEAD(net_packet_control, S_ACCOUNT_REGISTER, 1, 0, packet->session_id,
+            0);
+  net_packet_control.body_ = net_register_account.get();
+  send_message(socket, &net_packet_control);
+  return true;
+}
+
 bool Userslogic::OnUserAccount(struct server* srv, int socket,
                                struct PacketHead *packet) {
   users_logic::net_request::UserAccount user_account;
@@ -263,6 +320,43 @@ bool Userslogic::OnLoginAccount(struct server* srv, int socket,
   userinfo.set_token(token);
   //发送用信息
   SendUserInfo(socket, packet->session_id, S_ACCOUNT_LOGIN, userinfo);
+  return true;
+}
+
+
+bool Userslogic::OnLoginWiXin(struct server* srv, int socket,
+                                struct PacketHead *packet) {
+  users_logic::net_request::LoginWiXin login_wixin;
+  if (packet->packet_length <= PACKET_HEAD_LENGTH) {
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
+    return false;
+  }
+  struct PacketControl* packet_control = (struct PacketControl*) (packet);
+  bool r = login_wixin.set_http_packet(packet_control->body_);
+  if (!r) {
+    LOG_DEBUG2("packet_length %d",packet->packet_length);
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
+    return false;
+  }
+
+  std::string ip, passwd = "";
+  int port;
+  logic::SomeUtils::GetIPAddress(socket, ip, port);
+  swp_logic::UserInfo userinfo;
+
+  r = user_db_->LoginWiXin(login_wixin.open_id(), 
+                             login_wixin.device_id(), ip, userinfo, passwd);
+  if (!r || userinfo.uid() == 0) {
+    send_error(socket, ERROR_TYPE, NO_PASSWORD_ERRNOR, packet->session_id);
+    return false;
+  }
+
+  //token 计算
+  std::string token;
+  logic::SomeUtils::CreateToken(userinfo.uid(), passwd, &token);
+  userinfo.set_token(token);
+  //发送用信息
+  SendUserInfo(socket, packet->session_id, S_WX_LOGIN, userinfo);
   return true;
 }
 
@@ -369,6 +463,8 @@ bool Userslogic::SendUserInfo(const int socket, const int64 session,
   net_userinfo.set_phone(userinfo.phone_num());
   net_userinfo.set_uid(userinfo.uid());
   net_userinfo.set_type(userinfo.type());
+  net_userinfo.set_screen_name(userinfo.nickname());
+  net_userinfo.set_avatar_large(userinfo.head_url());
   net_login_account.set_userinfo(net_userinfo.get());
   net_login_account.set_token(userinfo.token());
   schduler_engine_->SetUserInfoSchduler(userinfo.uid(), &userinfo);
