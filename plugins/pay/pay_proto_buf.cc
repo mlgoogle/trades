@@ -172,6 +172,66 @@ bool WXPayOrder::set_http_packet(base_logic::DictionaryValue* value) {
   return true;
 }
 
+
+bool ThirdPayOrder::set_http_packet(base_logic::DictionaryValue* value) {
+  int32 err = 0;
+  bool r = false;
+  int64 uid;
+  std::string temp;
+  int32 pay_type = 0;
+  int64 big_pay_type = 0;
+  double amount;
+  if (value == NULL)
+    return false;
+
+  r = value->GetBigInteger(L"id", &uid);
+  if (r)
+    set_uid(uid);
+  else
+    return false;
+
+  r = value->GetString(L"merchantNo", &temp);
+  if (r)
+    set_merchant_no(temp);
+  else
+    return false;
+
+  r = value->GetReal(L"amount", &amount);
+  if (r)
+    set_amount(amount);
+  else {
+    int64 big_amount = 0;
+    r = value->GetBigInteger(L"amount", &big_amount);
+    if (!r)
+      return false;
+    amount = big_amount;
+    set_amount(amount);
+  }
+
+  r = value->GetString(L"payType", &temp);
+  if (r)
+    set_pay_type(temp);
+  else
+    return false;
+
+  r = value->GetString(L"currency", &temp);
+  if (r)
+    set_currency(temp);
+  else
+    return false;
+
+  r = value->GetString(L"outTradeNo", &temp);
+  if (r)
+    set_out_trade_no(temp);
+  else
+    return false;
+  r = value->GetString(L"content", &temp);
+  if (r)
+    set_content(temp);
+
+  return true;
+}
+
 }
 
 }

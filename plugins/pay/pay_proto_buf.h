@@ -301,6 +301,332 @@ class WXPayOrder {
   base_logic::StringValue* open_id_;//微信公众号支付必填
 };
 
+//Third
+class ThirdPayServer {
+ public:
+  ThirdPayServer()
+      : appid_(NULL),
+        mch_id_(NULL),
+        total_fee_(NULL),
+        recharge_id_(NULL),
+        pay_result_(NULL),
+        transaction_id_(NULL),
+        time_end_(NULL) {
+  }
+
+  ~ThirdPayServer() {
+    if (appid_) {
+      delete appid_;
+      appid_ = NULL;
+    }
+    if (mch_id_) {
+      delete mch_id_;
+      mch_id_ = NULL;
+    }
+    if (total_fee_) {
+      delete total_fee_;
+      total_fee_ = NULL;
+    }
+    if (recharge_id_) {
+      delete recharge_id_;
+      recharge_id_ = NULL;
+    }
+    if (pay_result_) {
+      delete pay_result_;
+      pay_result_ = NULL;
+    }
+    if (transaction_id_) {
+      delete transaction_id_;
+      transaction_id_ = NULL;
+    }
+    if (time_end_) {
+      delete time_end_;
+      time_end_ = NULL;
+    }
+  }
+
+  bool set_http_packet(base_logic::DictionaryValue* value);
+
+  void set_appid(std::string appid) {
+    appid_ = new base_logic::StringValue(appid);
+  }
+
+  void set_mch_id(std::string mch_id) {
+    mch_id_ = new base_logic::StringValue(mch_id);
+  }
+
+  void set_total_fee(int64 total_fee) {
+    total_fee_ = new base_logic::FundamentalValue(total_fee);
+  }
+
+  void set_recharge_id(int64 recharge_id) {
+    recharge_id_ = new base_logic::FundamentalValue(recharge_id);
+  }
+
+  void set_pay_result(int64 pay_result) {
+    pay_result_ = new base_logic::FundamentalValue(pay_result);
+  }
+
+  void set_transaction_id(std::string transaction_id) {
+    transaction_id_ = new base_logic::StringValue(transaction_id);
+  }
+
+  void set_time_end(std::string& time_end) {
+    time_end_ = new base_logic::StringValue(time_end);
+  }
+
+  std::string appid() {
+    std::string appid;
+    if (appid_)
+      appid_->GetAsString(&appid);
+    return appid;
+  }
+
+  std::string mch_id() {
+    std::string mch_id;
+    if (mch_id_)
+      mch_id_->GetAsString(&mch_id);
+    return mch_id;
+  }
+
+  std::string transaction_id() const {
+    std::string transaction_id;
+    if (transaction_id_)
+      transaction_id_->GetAsString(&transaction_id);
+    return transaction_id;
+  }
+
+  int64 total_fee() {
+    int64 total_fee;
+    if (total_fee_)
+      total_fee_->GetAsBigInteger(&total_fee);
+    return total_fee;
+  }
+
+  int64 recharge_id() {
+    int64 recharge_id;
+    if (recharge_id_)
+      recharge_id_->GetAsBigInteger(&recharge_id);
+    return recharge_id;
+  }
+
+  int64 pay_result() {
+    int64 pay_result;
+    if (pay_result_)
+      pay_result_->GetAsBigInteger(&pay_result);
+    return pay_result;
+  }
+
+ private:
+  base_logic::StringValue* appid_;
+  base_logic::StringValue* mch_id_;
+  base_logic::FundamentalValue* total_fee_;
+  base_logic::FundamentalValue* recharge_id_;
+  base_logic::FundamentalValue* pay_result_;  //1 - 支付成功
+  base_logic::StringValue* transaction_id_;
+  base_logic::StringValue* time_end_;
+};
+
+class ThirdPayClient {
+ public:
+  ThirdPayClient()
+      : uid_(NULL),
+        rid_(NULL),
+        pay_result_(NULL) {
+  }
+
+  ~ThirdPayClient() {
+    if (uid_) {
+      delete uid_;
+      uid_ = NULL;
+    }
+
+    if (rid_) {
+      delete rid_;
+      rid_ = NULL;
+    }
+
+    if (pay_result_) {
+      delete pay_result_;
+      pay_result_ = NULL;
+    }
+  }
+
+  bool set_http_packet(base_logic::DictionaryValue* value);
+
+  void set_uid(const int64 uid) {
+    uid_ = new base_logic::FundamentalValue(uid);
+  }
+
+  void set_rid(const int64 rid) {
+    rid_ = new base_logic::FundamentalValue(rid);
+  }
+
+  void set_pay_result(const int32 pay_result) {
+    pay_result_ = new base_logic::FundamentalValue(pay_result);
+  }
+
+  const int32 uid() const {
+    int64 uid = 0;
+    uid_->GetAsBigInteger(&uid);
+    return uid;
+  }
+
+  const int64 rid() const {
+    int64 rid = 0;
+    rid_->GetAsBigInteger(&rid);
+    return rid;
+  }
+
+  const int32 pay_result() const {
+    int32 pay_result = 0;
+    pay_result_->GetAsInteger(&pay_result);
+    return pay_result;
+  }
+
+ private:
+  base_logic::FundamentalValue* uid_;
+  base_logic::FundamentalValue* rid_;
+  base_logic::FundamentalValue* pay_result_;
+};
+
+class ThirdPayOrder {
+ public:
+  ThirdPayOrder()
+      : uid_(NULL),
+	merchant_no_(NULL),
+	amount_(NULL),
+	out_trade_no_(NULL),
+	currency_(NULL),
+	content_(NULL),
+	pay_type_(NULL)
+	{
+  }
+
+  ~ThirdPayOrder() {
+    if (uid_) {
+      delete uid_;
+      uid_ = NULL;
+    }
+
+    if (pay_type_) {
+      delete pay_type_;
+      pay_type_ = NULL;
+    }
+
+    if (merchant_no_) {
+      delete merchant_no_;
+      merchant_no_= NULL;
+    }
+    if (amount_) {
+      delete amount_;
+      amount_= NULL;
+    }
+    if (out_trade_no_) {
+      delete out_trade_no_;
+      out_trade_no_= NULL;
+    }
+
+    if (currency_) {
+      delete currency_;
+      currency_= NULL;
+    }
+
+    if (content_) {
+      delete content_;
+      content_= NULL;
+    }
+
+  }
+
+  bool set_http_packet(base_logic::DictionaryValue* value);
+
+  void set_uid(int64 uid) {
+    uid_ = new base_logic::FundamentalValue(uid);
+  }
+
+  void set_merchant_no(std::string& merchant_no) {
+    merchant_no_ = new base_logic::StringValue(merchant_no);
+  }
+
+  void set_amount(double amount) {
+    amount_ = new base_logic::FundamentalValue(amount);
+  }
+
+  void set_pay_type(const std::string& pay_type) {
+    pay_type_ = new base_logic::StringValue(pay_type);
+  }
+  void set_out_trade_no(const std::string& out_trade_no) {
+    out_trade_no_ = new base_logic::StringValue(out_trade_no);
+  }
+  void set_currency(const std::string& currency) {
+    currency_ = new base_logic::StringValue(currency);
+  }
+  void set_content(const std::string& content) {
+    content_ = new base_logic::StringValue(content);
+  }
+
+  int64 uid() {
+    int64 uid;
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
+    return uid;
+  }
+  const std::string merchant_no() {
+    std::string merchant_no;
+    if (merchant_no_)
+      merchant_no_->GetAsString(&merchant_no);
+    return merchant_no;
+  }
+
+  double amount() {
+    double amount;
+    if (amount_)
+      amount_->GetAsReal(&amount);
+    return amount;
+  }
+
+  const std::string pay_type() {
+    std::string pay_type;
+    if (pay_type_)
+      pay_type_->GetAsString(&pay_type);
+    return pay_type;
+  }
+  const std::string out_trade_no() {
+    std::string out_trade_no;
+    if (out_trade_no_)
+      out_trade_no_->GetAsString(&out_trade_no);
+    return out_trade_no;
+  }
+  const std::string currency() {
+    std::string currency;
+    if (currency_)
+      currency_->GetAsString(&currency);
+    return currency;
+  }
+  const std::string content() {
+    std::string content;
+    if (content_)
+      content_->GetAsString(&content);
+    return content;
+  }
+
+ private:
+  base_logic::FundamentalValue* uid_;
+ // base_logic::StringValue* title_;  //应用名-商品名 eg.交易支付
+ // base_logic::FundamentalValue* price_;  // 订单总价  单位 分
+ // base_logic::FundamentalValue* pay_type_;  //1为微信APP 0 微信公众号
+ // base_logic::StringValue* open_id_;//微信公众号支付必填
+
+  base_logic::StringValue* merchant_no_;//
+  base_logic::FundamentalValue* amount_;  // 订单总价  单位 分
+  base_logic::StringValue* out_trade_no_;//
+  base_logic::StringValue* currency_;//
+  base_logic::StringValue* content_;//
+  base_logic::StringValue* pay_type_;//
+};
+//end Third
+
 }
 
 namespace net_reply {
@@ -418,6 +744,38 @@ class Balance {
   }
  private:
   base_logic::FundamentalValue* balance_;
+  base_logic::DictionaryValue* value_;
+};
+
+
+class ThirdPayOrder {
+ public:
+  ThirdPayOrder()
+      : payment_info_(NULL) {
+  }
+
+  ~ThirdPayOrder() {
+    if (payment_info_) {
+      delete payment_info_;
+      payment_info_= NULL;
+    }
+  }
+  void set_payment_info(const std::string& payment_info) {
+    payment_info_ = new base_logic::StringValue(payment_info);
+  }
+
+
+  base_logic::DictionaryValue* get() {
+    value_ = new base_logic::DictionaryValue();
+    if (payment_info_ != NULL)
+      value_->Set(L"paymentInfo", payment_info_);
+
+    return value_;
+  }
+
+ private:
+  base_logic::StringValue* payment_info_;
+  //base_logic::StringValue* rid_;  //为兼容暂时使用string
   base_logic::DictionaryValue* value_;
 };
 

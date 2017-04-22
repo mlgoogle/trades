@@ -88,6 +88,8 @@ bool Userslogic::OnUsersMessage(struct server *srv, const int socket,
     return false;
   }
 
+try
+{
   switch (packet->operate_code) {
     case R_ACCOUNT_REGISTER: {
       OnRegisterAccount(srv, socket, packet);
@@ -121,6 +123,12 @@ bool Userslogic::OnUsersMessage(struct server *srv, const int socket,
     default:
       break;
   }
+
+}
+catch (...)
+{
+    LOG_DEBUG2("catch...... packet_length %d",packet->packet_length);
+}
   return true;
 }
 

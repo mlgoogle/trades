@@ -8,6 +8,7 @@
 #include "manager/data_share_mgr.h"
 #include "pay/pay_db.h"
 #include "pay/wx_order.h"
+#include "pay/third_order.h"
 #include "thread/base_thread_handler.h"
 #include "thread/base_thread_lock.h"
 
@@ -30,6 +31,15 @@ class PayManager {
                        const std::string& title, const double price,const int32 pay_type,
                        const std::string& open_id);
 
+  bool OnThirdCreateCashOrder(const int socket, const int64 session,
+                       const int32 reversed, const int64 uid,
+                       const double price,const std::string& pay_type,
+                       const std::string& content);
+  bool OnThirdCreateOrder(const int socket, const int64 session,
+                       const int32 reversed, const int64 uid,
+                       const double price,const std::string& pay_type,
+                       const std::string& content);
+
   bool OnWXClient(const int socket, const int64 session, const int32 reversed,
                   const int64 uid, const int64 rid, const int32 pay_result);
 
@@ -43,6 +53,16 @@ class PayManager {
                pay_logic::WXOrder& wx_order);
 
   bool ParserWXOrderResult(std::string& result, std::string& prepay_id);
+
+
+  bool ThirdOrder(const int socket, const int64 rid,
+               const double price,const std::string& pay_type, const std::string& content,
+               pay_logic::ThirdOrder& third_order);
+  bool ThirdCashOrder(const int socket, const int64 rid,
+               const double price,const std::string& pay_type, const std::string& content,
+               pay_logic::ThirdOrder& third_order);
+
+  bool ParserThirdOrderResult(std::string& result, std::string& prepay_id);
  private:
   pay_logic::PayDB* pay_db_;
   PayCache *pay_cache_;

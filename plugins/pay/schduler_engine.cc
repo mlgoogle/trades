@@ -118,6 +118,179 @@ bool PayManager::OnWXCreateOrder(const int socket, const int64 session,
   return true;
 }
 
+
+bool PayManager::OnThirdCreateCashOrder(const int socket, const int64 session,
+                                 const int32 reversed, const int64 uid,
+                                 const double price,
+                                 const std::string& pay_type, const std::string& content) {
+  //创建订单号
+  pay_logic::ThirdOrder third_order;
+  int64 rid = base::SysRadom::GetInstance()->GetRandomID();
+
+  bool r = ThirdCashOrder(socket,  rid, price, pay_type,content ,third_order);
+  if (!r) {
+    send_error(socket, ERROR_TYPE, WX_ORDER_ERROR, session);
+    return false;
+  }
+
+  r = pay_db_->OnCreateRechargeOrder(uid, rid, price, WX_APP);
+  if (!r) {
+    send_error(socket, ERROR_TYPE, STOAGE_ORDER_ERROR, session);
+    return r;
+  }
+  pay_logic::net_reply::ThirdPayOrder r_third_order;
+  struct PacketControl packet_control;
+
+  std::string package;
+/*
+  if (0 == pay_type){
+    package = third_order.get_package();
+  }else {
+    package = "prepay_id=" + third_order.get_prepayid();
+  }
+*/
+  MAKE_HEAD(packet_control, S_THIRD_PAY, USER_TYPE, 0, session, 0);
+  r_third_order.set_payment_info(third_order.get_payment_info());
+  //r_third_order.set_sign(third_order.get_prepaysign());
+  //r_third_order.set_rid(rid);
+  packet_control.body_ = r_third_order.get();
+  send_message(socket, &packet_control);
+  return true;
+}
+
+
+bool PayManager::OnThirdCreateOrder(const int socket, const int64 session,
+                                 const int32 reversed, const int64 uid,
+                                 const double price,
+                                 const std::string& pay_type, const std::string& content) {
+  //创建订单号
+  pay_logic::ThirdOrder third_order;
+  int64 rid = base::SysRadom::GetInstance()->GetRandomID();
+  //base_logic::DictionaryValue recharge_dic;
+  bool r = ThirdOrder(socket,  rid, price, pay_type,content ,third_order);
+  if (!r) {
+    send_error(socket, ERROR_TYPE, WX_ORDER_ERROR, session);
+    return false;
+  }
+
+  r = pay_db_->OnCreateRechargeOrder(uid, rid, price, WX_APP);
+  if (!r) {
+    send_error(socket, ERROR_TYPE, STOAGE_ORDER_ERROR, session);
+    return r;
+  }
+  pay_logic::net_reply::ThirdPayOrder r_third_order;
+  struct PacketControl packet_control;
+
+  std::string package;
+/*
+  if (0 == pay_type){
+    package = third_order.get_package();
+  }else {
+    package = "prepay_id=" + third_order.get_prepayid();
+  }
+*/
+  MAKE_HEAD(packet_control, S_THIRD_PAY, USER_TYPE, 0, session, 0);
+  r_third_order.set_payment_info(third_order.get_payment_info());
+  //r_third_order.set_partnerid(third_order.get_partnerid());
+  //r_third_order.set_prepayid(third_order.get_prepayid());
+  //r_third_order.set_noncestr(third_order.get_nonce_str());
+  //r_third_order.set_timestamp(third_order.get_timestamp());
+  //r_third_order.set_sign(third_order.get_prepaysign());
+  //r_third_order.set_rid(rid);
+  packet_control.body_ = r_third_order.get();
+  send_message(socket, &packet_control);
+  return true;
+}
+
+
+bool PayManager::ParserThirdOrderResult(std::string& result,
+                                     std::string& prepay_id) {
+  base_logic::ValueSerializer* deserializer =
+      base_logic::ValueSerializer::Create(base_logic::IMPL_XML, &result);
+  std::string err_str;
+  int32 err = 0;
+  bool r = false;
+  base_logic::DictionaryValue* dic = (DicValue*) deserializer->Deserialize(
+      &err, &err_str);
+  if (dic == NULL)
+    return false;
+  std::string return_code;
+  r = dic->GetString(L"return_code", &return_code);
+  if (!r)
+    return false;
+  //下单成功
+  if (return_code.find("SUCCESS") == std::string::npos)
+    return false;
+  std::string result_code;
+  r = dic->GetString(L"result_code", &result_code);
+  if (!r)
+    return false;
+  if (result_code.find("SUCCESS") == std::string::npos)
+    return false;
+
+  //r = dic->GetString(L"prepay_id", &prepay_id);
+  r = dic->GetString(L"paymentInfo", &prepay_id);
+  if (!r)
+    return false;
+  //int npos1 = prepay_id.find("<![CDATA[");
+  //int npos2 = prepay_id.find("]]>");
+  //prepay_id = prepay_id.substr(npos1 + 9, npos2 - npos1 - 9);
+
+  //
+  return true;
+}
+
+bool PayManager::ThirdOrder(const int socket, 
+                         const int64 rid, const double price,
+                         const std::string &pay_type,const std::string& content, 
+                         pay_logic::ThirdOrder& third_order) {
+
+  std::string prepay_id;
+  std::string ip;
+  std::string app_id;
+  int port;
+  if (logic::SomeUtils::GetIPAddress(socket, ip, port))
+    third_order.set_spbill_create_ip(ip);
+
+  //third_order.set_body(title);
+  std::string str_rid = base::BasicUtil::StringUtil::Int64ToString(rid);
+  third_order.set_out_trade_no(str_rid);
+  third_order.set_total_fee(price * 100);
+  std::string third_result = third_order.PlaceOrder(app_id, pay_type, content);
+  bool r = ParserThirdOrderResult(third_result, prepay_id);
+  if (!r)
+    return false;
+  third_order.set_payment_info(prepay_id);
+  third_order.PreSign();
+  return true;
+}
+
+
+bool PayManager::ThirdCashOrder(const int socket, 
+                         const int64 rid, const double price,
+                         const std::string &pay_type,const std::string& content, 
+                         pay_logic::ThirdOrder& third_order) {
+
+  std::string prepay_id;
+  std::string ip;
+  std::string app_id;
+  int port;
+  if (logic::SomeUtils::GetIPAddress(socket, ip, port))
+    third_order.set_spbill_create_ip(ip);
+
+  //third_order.set_body(title);
+  std::string str_rid = base::BasicUtil::StringUtil::Int64ToString(rid);
+  third_order.set_out_trade_no(str_rid);
+  third_order.set_total_fee(price * 100);
+  std::string third_result = third_order.PlaceOrder(app_id, pay_type, content);
+  bool r = ParserThirdOrderResult(third_result, prepay_id);
+  if (!r)
+    return false;
+  third_order.set_payment_info(prepay_id);
+  third_order.PreSign();
+  return true;
+}
+
 bool PayManager::WXOrder(const int socket, const std::string& title,
                          const int64 rid, const double price,
                          const int32 pay_type, const std::string& open_id,

@@ -8,22 +8,19 @@
 #include "logic/base_values.h"
 
 
-const std::string APPID = "th9dc39aec13ee3158";
-const std::string MCH_ID = "1404391902";
+const std::string T_APPID = "th9dc39aec13ee3158";
+const std::string T_MCH_ID = "MNYH54001EBOM"; //商户号
 
-const std::string MPID = "the9f0932fb23e8f8a";
-const std::string MPMCH_ID = "1419354002";
+const std::string T_MPID = "the9f0932fb23e8f8a";
 
-const std::string APP_KEY = "241b71f361d6663c12a12e0f43208ae9";
-const std::string MP_KEY = "5A9KRBAxYNoNLuaDeWo6U2NzaMvT0iEM";
+const std::string T_APP_KEY = "2017042116284843001"; //证书编号
 
-const std::string APP_TRADE_TYPE = "APP";
-const std::string MP_TRADE_TYPE = "JSAPI";
+const std::string T_APP_TRADE_TYPE = "APP";
 
-const std::string THIRD_URL = "https://gw.dev.uqiantu.net/native/{apiName}/{apiVersion}";
-const std::string WX_PACKAGE = "Sign=WXPay";
-const std::string NOTIFY_URL =
-    "http://139.224.34.22/cgi-bin/flight/pay/v1/wx_callback.fcgi";
+const std::string THIRD_URL = "https://gw.dev.uqiantu.net/native/";
+const std::string THIRD_PACKAGE = "Sign=ThirdPay";
+const std::string T_NOTIFY_URL =
+    "http://139.224.34.22/cgi-bin/flight/pay/v1/third_callback.fcgi";
 
 /*
  */
@@ -46,21 +43,25 @@ class ThirdOrder {
   inline void set_spbill_create_ip(std::string ip) {
     spbill_create_ip = ip;
   }
+  inline void set_payment_info(const std::string &paymentinfo) {
+    payment_info = paymentinfo;
+  }
   inline void set_prepayid(std::string preid) {
     prepayid = preid;
   }
   void PreSign();
   void PreSerialize(base_logic::DictionaryValue* dic);
   std::string PlaceOrder();
-  std::string PlaceOrder(const std::string& id, const std::string& m_id, const std::string& trade_type,
-                         const std::string& k_key, const int32 ptype,
-                         const std::string& open_id);
+  std::string PlaceOrder(const std::string& id, const std::string& pay_type,const std::string &content);
 
   inline std::string get_appid() {
     return appid;
   }
   inline std::string get_partnerid() {
     return mch_id;
+  }
+  inline std::string get_payment_info() {
+    return payment_info;
   }
   inline std::string get_prepayid() {
     return prepayid;
@@ -95,9 +96,9 @@ class ThirdOrder {
 //"</xml>";
   std::string PostFiled();
   void InitWxVerify();
-  void InitWxVerify(const std::string& id, const std::string& m_id,
-                    const std::string& t_type,
-                    const std::string& k_key,const std::string& o_id);
+  void InitWxVerify(const std::string& id, 
+                    const std::string& pay_type,
+                    const std::string& content);
 
 //  微信下单签名
 //  签名算法
@@ -128,32 +129,19 @@ class ThirdOrder {
   //void PlaceOrderSign(const std::string& id, const std::string& m_id, const std::string& t_type,const std::string& k_key,
     //                  const int32 ptype,const std::string& open_id);
  private:
-  //微信开放平台审核通过的应用APPID
-  std::string appid;
   //APP——需传入应用市场上的APP名字-实际商品名称，天天爱消除-游戏充值
   std::string body;
-  //微信支付分配的商户号
-  std::string mch_id;
   //随机字符串，不长于32位
   std::string nonce_str;
-  //接收微信支付异步通知回调地址，通知url必须为直接可访问的url，不能携带参数。
-  std::string notify_url;
-  //商户系统内部的订单号,32个字符内、可包含字母
-  std::string out_trade_no;
   //用户端实际ip
   std::string spbill_create_ip;
-  //订单总金额，单位为分
-  int total_fee;
   //支付类型 固定 为 APP //类型 0 app  1.微信公众号
   std::string trade_type;
   //商户key 参与sign签名-不做其他用途
   std::string key;
-  //签名，详见函数说明
-  std::string sign;
 
   //openid
   std::string open_id;
-
   //下单成功
 
   //微信生成的预支付回话标识，用于后续接口调用中使用，该值有效期为2小时
@@ -164,6 +152,23 @@ class ThirdOrder {
   std::string package;
   //时间戳
   std::string timestamp;
+//----------------------------------------------------------------------------------------------------------------
+  //商户系统内部的订单号,32个字符内、可包含字母
+  std::string out_trade_no;
+  
+  int total_fee;	//订单总金额，单位为分
+  
+  std::string mch_id; //merchantNo//支付分配的商户号
+  //平台审核通过的应用APPID
+  std::string appid;
+
+  //签名，详见函数说明
+  std::string sign;
+  //接收支付异步通知回调地址，通知url必须为直接可访问的url，不能携带参数。
+  std::string notify_url;
+  std::string pay_type;		//支付类型
+  std::string content;		//交易描述
+  std::string payment_info;
 };
 
 }

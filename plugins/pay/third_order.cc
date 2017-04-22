@@ -19,53 +19,52 @@ ThirdOrder::ThirdOrder() {
 ThirdOrder::~ThirdOrder() {
 }
 
-void ThirdOrder::InitWxVerify(const std::string& id, const std::string& m_id,
-                           const std::string& t_type, const std::string& k_key,
-                           const std::string& o_id) {
+void ThirdOrder::InitWxVerify(const std::string& id, 
+                           const std::string& p_type, 
+                           const std::string& ctent) {
   appid = id;
-  mch_id = m_id;
-  notify_url = NOTIFY_URL;
-  trade_type = t_type;
-  if (trade_type == APP_TRADE_TYPE)
-    package = WX_PACKAGE;
-  else
-    //prepay_id=微信订单id
-    package = "prepay_id=" + out_trade_no;
-
-  key = k_key;
-  open_id = o_id;
+  //mch_id = m_id;
+  mch_id = T_MCH_ID;
+  notify_url = T_NOTIFY_URL;
+  pay_type = p_type;
+  content = ctent;
+//
   nonce_str = logic::SomeUtils::RandomString(32);
-  //out_trade_no += logic::SomeUtils::RandomString(6);
 }
 
 void ThirdOrder::InitWxVerify() {
-  appid = APPID;
-  mch_id = MCH_ID;
-  notify_url = NOTIFY_URL;
-  trade_type = APP_TRADE_TYPE;
-  package = WX_PACKAGE;
-  key = APP_KEY;
+  appid = T_APPID;
+  mch_id = T_MCH_ID;
+  notify_url = T_NOTIFY_URL;
+  trade_type = T_APP_TRADE_TYPE;
+  package = THIRD_PACKAGE;
+  key = T_APP_KEY;
   nonce_str = logic::SomeUtils::RandomString(32);
   //out_trade_no += logic::SomeUtils::RandomString(6);
 }
 
 void ThirdOrder::PlaceOrderSign() {
   std::stringstream ss;
-  ss << "appid=" << appid << "&body=" << body << "&mch_id=" << mch_id
-      << "&nonce_str=" << nonce_str << "&notify_url=" << notify_url;
-  if (!open_id.empty())
-    ss << "&openid=" << open_id.c_str();
-  ss << "&out_trade_no=" << out_trade_no << "&spbill_create_ip="
-      << spbill_create_ip << "&total_fee=" << total_fee << "&trade_type="
-      << trade_type << "&key=" << key;
+  std::string req_url = THIRD_URL;
+  ss << req_url;
+  ss <<  "&amount" << total_fee
+      << "&callbackURL=" << notify_url
+      << "&content=" << content 
+	<< "&merchantNo=" << mch_id;
 
-  LOG_DEBUG2("WX_ORDER_SIGN before: %s",ss.str().c_str());
+  ss << "&outTradeNo=" << out_trade_no 
+      << "&payType=" << pay_type
+//<< "&spbill_create_ip="
+//     << spbill_create_ip 
+     << "&key=" << key;
+
+  LOG_DEBUG2("THIRD_ORDER_SIGN before: %s",ss.str().c_str());
   base::MD5Sum md5sum(ss.str());
-  LOG_DEBUG2("WX_ORDER_SIGN_MD5 after: %s",md5sum.GetHash().c_str());
+  LOG_DEBUG2("THIRD_ORDER_SIGN_MD5 after: %s",md5sum.GetHash().c_str());
   sign = md5sum.GetHash();
 }
 
-//微信APP充值
+//APP充值
 void ThirdOrder::PreSign() {
   //重新赋值 nonce_str
   nonce_str = logic::SomeUtils::RandomString(32);
@@ -74,7 +73,7 @@ void ThirdOrder::PreSign() {
   timestamp = ss.str();
   ss.str("");
   ss.clear();
-  if (trade_type == APP_TRADE_TYPE) {
+  if (trade_type == T_APP_TRADE_TYPE) {
     ss << "appid=" << appid << "&noncestr=" << nonce_str << "&package=Sign=WXPay"
           << "&partnerid=" << mch_id << "&prepayid=" << prepayid << "&timestamp="
           << timestamp << "&key=" << key;
@@ -93,6 +92,7 @@ void ThirdOrder::PreSign() {
 
 std::string ThirdOrder::PostFiled() {
   base_logic::DictionaryValue dic;
+/*
   dic.SetString(L"appid", appid);
   dic.SetString(L"body", body);
   dic.SetString(L"mch_id", mch_id);
@@ -105,6 +105,14 @@ std::string ThirdOrder::PostFiled() {
   dic.SetString(L"sign", sign);
   if (!open_id.empty())
     dic.SetString(L"openid", open_id);
+*/
+  dic.SetString(L"merchantNo", mch_id);
+  dic.SetString(L"outTradeNo", out_trade_no);
+  dic.SetString(L"notify_url", notify_url);
+  dic.SetBigInteger(L"amount", total_fee);
+  dic.SetString(L"content", content);
+  dic.SetString(L"payType", pay_type);
+
   std::string filed = "";
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
       base_logic::IMPL_XML, &filed);
@@ -114,25 +122,25 @@ std::string ThirdOrder::PostFiled() {
   return filed;
 }
 
-std::string ThirdOrder::PlaceOrder(const std::string& id, const std::string& m_id,
-                                const std::string& trade_type,
-                                const std::string& k_key, const int32 ptype,
-                                const std::string& open_id) {
-  InitWxVerify(id, m_id, trade_type, k_key, open_id);
+std::string ThirdOrder::PlaceOrder(const std::string& id, 
+                                const std::string& pay_type,
+                                const std::string& content) {
+  InitWxVerify(id, pay_type, content);
   //PlaceOrderSign(id, m_id, trade_type, k_key, ptype, open_id);
   PlaceOrderSign();
   http::HttpMethodPost hmp(THIRD_URL);
   //std::string headers = "Content-Type: text/xml";
   std::string headers = "x-oapi-pv: 0.0.1";
-  hmp.SetHeaders(headers);
-  headers = "x-oapi-sdkv: 0.0.1"; //api version
+  //std::string headers = "com.opentech.cloud.easypay.trade.create: 0.0.1";
+  hmp.SetHeaders(headers); //api version
+  headers = "x-oapi-sdkv: 0.0.1"; 
   hmp.SetHeaders(headers);	  //sdk version
 
-  headers = "x-oapi-sk: key";	  //证书key
+  headers = "x-oapi-sk: 2017042116284843001";	  //证书key
   hmp.SetHeaders(headers);
-  headers = "x-oapi-sign: sign";
+  headers = "x-oapi-sign: " + sign;
   hmp.SetHeaders(headers);
-
+///
   hmp.Post(PostFiled().c_str());
   std::string result;
   hmp.GetContent(result);
