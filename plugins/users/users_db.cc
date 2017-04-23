@@ -80,6 +80,44 @@ bool UsersDB::RegisterAccount(const std::string& phone_num,
   return r;
 }
 
+bool UsersDB::WXBindAccount(const std::string& phone_num,
+                              const std::string& passwd, const int32 type,
+                              int64& uid, int32& result, const std::string &openid, 
+			      const std::string &nick_name, const std::string &head_url,
+			      const std::string &agent_id, const std::string &recommend,
+			      const std::string &device_id, const int64 member_id) {
+  bool r = false;
+  base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
+  base_logic::DictionaryValue *info_value = NULL;
+  std::string sql;
+  int64 big_type = type;
+  //call actuals.proc_RegisterAccount('18668169052','1234124123')
+  sql = "call proc_WXBindAccount('" + phone_num + "','" + passwd + "',"
+      + base::BasicUtil::StringUtil::Int64ToString(big_type)  + ","
+      + base::BasicUtil::StringUtil::Int64ToString(member_id)  + ",'"
+      + head_url + "','" + nick_name + "','" + openid 
+      + "','" + agent_id + "','" + recommend
+      + "','" + device_id + "');";
+
+  base_logic::ListValue *listvalue;
+  dict->SetString(L"sql", sql);
+  r = mysql_engine_->ReadData(0, (base_logic::Value *) (dict),
+                              CallRegisterAccount);
+  if (!r)
+    return false;
+
+  dict->GetDictionary(L"resultvalue", &info_value);
+
+  r = info_value->GetBigInteger(L"uid", &uid);
+  r = info_value->GetInteger(L"result", &result);
+  r = (r && uid > 0) ? true : false;
+  if (dict) {
+    delete dict;
+    dict = NULL;
+  }
+  return r;
+}
+
 bool UsersDB::GetUserInfo(const int64 uid, const std::string& ip,
                           swp_logic::UserInfo& userinfo) {
 
@@ -138,6 +176,37 @@ bool UsersDB::LoginAccount(const std::string& phone_num,
   return r;
 }
 
+
+bool UsersDB::LoginWiXin(const std::string& open_id,
+                           const std::string &device_id,
+			   const std::string& ip, swp_logic::UserInfo& user, std::string &passwd) {
+  bool r = false;
+  base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
+  base_logic::DictionaryValue *info_value = NULL;
+  std::string sql;
+
+  //call actuals.proc_LoginAccount('18668169052','4bcf73028a526f5ae6899759ab332c3d3b173855bef3b22b19224cd5233d39c0','127.0,0.1')
+  sql = "call proc_LoginWiXin('" + open_id + "','"+ device_id + "','" + ip
+      + "')";
+
+  dict->SetString(L"sql", sql);
+  r = mysql_engine_->ReadData(0, (base_logic::Value *) (dict),
+                              CallLoginAccount);
+  if (!r)
+    return false;
+
+  dict->GetDictionary(L"resultvalue", &info_value);
+
+  user.ValueSerialization(info_value);
+  info_value->GetString(L"passwd", &passwd); 
+  if (dict) {
+    delete dict;
+    dict = NULL;
+  }
+  return r;
+}
+
+
 bool UsersDB::AccountBalance(const int64 uid, double & balance) {
   bool r = false;
   base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
@@ -184,6 +253,12 @@ void UsersDB::CallLoginAccount(void* param, base_logic::Value* value) {
         info_value->SetString(L"phone", rows[3]);
       if (rows[4] != NULL)
         info_value->SetInteger(L"type", atoi(rows[4]));
+      if (rows[5] != NULL)
+        info_value->SetString(L"nickname", rows[5]);
+      if (rows[6] != NULL)
+        info_value->SetString(L"head_url", rows[6]);
+      if (rows[7] != NULL)
+        info_value->SetString(L"passwd", rows[7]);
     }
   }
   dict->Set(L"resultvalue", (base_logic::Value *) (info_value));

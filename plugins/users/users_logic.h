@@ -52,6 +52,10 @@ class Userslogic {
 
   bool OnLoginAccount(struct server* srv, int socket,
                       struct PacketHead *packet);
+  bool OnLoginWiXin(struct server* srv, int socket,
+                      struct PacketHead *packet);
+  bool OnWXBindAccount(struct server* srv, int socket,
+                      struct PacketHead *packet);
 
   bool OnUserAccount(struct server* srv, int socket, struct PacketHead *packet);
 

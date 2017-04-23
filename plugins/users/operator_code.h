@@ -24,5 +24,12 @@ namespace users_logic {
 
 #define R_REGISTER_VERFIY_CODE USERS_TYPE * 1000 + 11
 #define S_REGISTER_VERFIY_CODE USERS_TYPE * 1000 + 12
+//add
+#define R_WX_LOGIN USERS_TYPE * 1000 + 13
+#define S_WX_LOGIN USERS_TYPE * 1000 + 14
+#define R_WX_BIND_ACCOUNT USERS_TYPE * 1000 + 15
+#define S_WX_BIND_ACCOUNT USERS_TYPE * 1000 + 16
+
 }
+
 #endif
