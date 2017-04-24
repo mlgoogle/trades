@@ -80,6 +80,7 @@ bool Paylogic::OnPayConnect(struct server *srv, const int socket) {
 
 bool Paylogic::OnPayMessage(struct server *srv, const int socket,
                             const void *msg, const int len) {
+  printf("operator_code............[],\n"); //tw test
   bool r = false;
   struct PacketHead *packet = NULL;
   if (srv == NULL || socket < 0 || msg == NULL || len < PACKET_HEAD_LENGTH)
@@ -93,6 +94,7 @@ bool Paylogic::OnPayMessage(struct server *srv, const int socket,
 	
 try
 {
+  printf("operator_code[%d],\n", packet->operate_code); //tw test
   switch (packet->operate_code) {
     case R_WEIXIN_PAY: {
       OnWXPayOrder(srv, socket, packet);
@@ -104,6 +106,7 @@ try
     }
     case R_WEIXIN_SVC: {
       OnWXPaySever(srv, socket, packet);
+      break;
     }
 
     case R_THIRD_PAY: {
@@ -237,6 +240,8 @@ bool Paylogic::OnWXPaySever(struct server* srv, int socket,
 
 bool Paylogic::OnThirdPayOrder(struct server* srv, int socket,
                             struct PacketHead *packet) {
+  printf("tw________packet_length[%d],\n", packet->packet_length); //tw test
+  LOG_DEBUG2("tw________packet_length[%d],\n", packet->packet_length); //tw test
   pay_logic::net_request::ThirdPayOrder third_pay_order;
   if (packet->packet_length <= PACKET_HEAD_LENGTH) {
     send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
@@ -256,13 +261,14 @@ bool Paylogic::OnThirdPayOrder(struct server* srv, int socket,
       third_pay_order.content());
 
 
+  printf("tw________packet_length....end[%d],\n", packet->packet_length); //tw test
   return true;
 }
 
 
 bool Paylogic::OnThirdCashOrder(struct server* srv, int socket,
                             struct PacketHead *packet) {
-  pay_logic::net_request::ThirdPayOrder third_cash_order;
+  pay_logic::net_request::ThirdCashOrder third_cash_order;
   if (packet->packet_length <= PACKET_HEAD_LENGTH) {
     send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
     return false;
@@ -277,8 +283,8 @@ bool Paylogic::OnThirdCashOrder(struct server* srv, int socket,
 
   pay_logic::PayEngine::GetSchdulerManager()->OnThirdCreateCashOrder(
       socket, packet->session_id, packet->reserved, third_cash_order.uid(),
-      third_cash_order.amount(),third_cash_order.pay_type(),
-      third_cash_order.content());
+      third_cash_order.amount(),third_cash_order.rec_bank_name(),
+      third_cash_order.rec_branch_bank_name(),third_cash_order.rec_card_no(), third_cash_order.rec_account_name());
 
 
   return true;

@@ -12,8 +12,11 @@
 
 namespace pay_logic {
 
+const std::string PASSWORD = "password";
 ThirdOrder::ThirdOrder() {
   total_fee = 0;
+  fee = 0;
+  transfer_amount = 0;  
 }
 
 ThirdOrder::~ThirdOrder() {
@@ -32,6 +35,12 @@ void ThirdOrder::InitWxVerify(const std::string& id,
   nonce_str = logic::SomeUtils::RandomString(32);
 }
 
+void ThirdOrder::InitWxVerify(const std::string& id) {
+//cash use
+  appid = id;
+  mch_id = T_MCH_ID;
+  notify_url = T_CASH_NOTIFY_URL;
+}
 void ThirdOrder::InitWxVerify() {
   appid = T_APPID;
   mch_id = T_MCH_ID;
@@ -43,20 +52,43 @@ void ThirdOrder::InitWxVerify() {
   //out_trade_no += logic::SomeUtils::RandomString(6);
 }
 
-void ThirdOrder::PlaceOrderSign() {
+void ThirdOrder::PlaceOrderSign(bool iscash) {
   std::stringstream ss;
-  std::string req_url = THIRD_URL;
+  //std::string req_url = THIRD_URL+"";
+  std::string req_url = THIRD_URL + "com.opentech.cloud.easypay.trade.create/ 0.0.1";
+  if (iscash)
+    req_url = THIRD_CASH_URL + "com.opentech.cloud.easypay.balance.pay/0.0.1";
+    //req_url = THIRD_CASH_URL+"";
   ss << req_url;
-  ss <<  "&amount" << total_fee
-      << "&callbackURL=" << notify_url
-      << "&content=" << content 
-	<< "&merchantNo=" << mch_id;
 
-  ss << "&outTradeNo=" << out_trade_no 
-      << "&payType=" << pay_type
+
+  ss << "&x-oapi-pv=0.0.1"
+   << "&x-oapi-sdkv=0.0.1/c" 
+   << "&x-oapi-sk=" << T_APP_KEY	  //证书key
+   << "&x-oapi-sm=MD5";
+
+  ss << "&amount=" << total_fee
+     << "&callbackURL=" << notify_url;
+  if (iscash)
+  {
+     ss << "&merchantNo=" << mch_id
+	<< "&outPayNo=" << out_trade_no 
+        << "&payPassword=" << PASSWORD
+        << "&receiverAccountName=" << rec_account_name
+        << "&receiverBankName=" << rec_bank_name
+        << "&receiverBranchBankName=" << rec_branch_bank_name
+        << "&receiverCardNo=" << rec_card_no;
+  }
+  else
+  {
+     ss << "&content=" << content 
+        << "&merchantNo=" << mch_id
+        << "&outTradeNo=" << out_trade_no 
+        << "&payType=" << pay_type;
+  }
 //<< "&spbill_create_ip="
 //     << spbill_create_ip 
-     << "&key=" << key;
+     ss << "&key=" << key;
 
   LOG_DEBUG2("THIRD_ORDER_SIGN before: %s",ss.str().c_str());
   base::MD5Sum md5sum(ss.str());
@@ -90,28 +122,27 @@ void ThirdOrder::PreSign() {
   prepaysign = md5sum.GetHash();
 }
 
-std::string ThirdOrder::PostFiled() {
+std::string ThirdOrder::PostFiled(bool iscash) {
   base_logic::DictionaryValue dic;
-/*
-  dic.SetString(L"appid", appid);
-  dic.SetString(L"body", body);
-  dic.SetString(L"mch_id", mch_id);
-  dic.SetString(L"nonce_str", nonce_str);
-  dic.SetString(L"notify_url", notify_url);
-  dic.SetString(L"out_trade_no", out_trade_no);
-  dic.SetString(L"spbill_create_ip", spbill_create_ip);
-  dic.SetBigInteger(L"total_fee", total_fee);
-  dic.SetString(L"trade_type", trade_type);
-  dic.SetString(L"sign", sign);
-  if (!open_id.empty())
-    dic.SetString(L"openid", open_id);
-*/
+
   dic.SetString(L"merchantNo", mch_id);
-  dic.SetString(L"outTradeNo", out_trade_no);
-  dic.SetString(L"notify_url", notify_url);
+  dic.SetString(L"callbackURL", notify_url);
   dic.SetBigInteger(L"amount", total_fee);
-  dic.SetString(L"content", content);
-  dic.SetString(L"payType", pay_type);
+  if (iscash)
+  {
+    dic.SetString(L"outPayNo", out_trade_no);
+    dic.SetString(L"payPassword", PASSWORD);
+    dic.SetString(L"receiverBankName", rec_bank_name);
+    dic.SetString(L"receiverBranchBankName", rec_branch_bank_name);
+    dic.SetString(L"receiverCardNo", rec_card_no);
+    dic.SetString(L"receiverAccountName", rec_account_name);
+  }
+  else
+  {
+    dic.SetString(L"outTradeNo", out_trade_no);
+    dic.SetString(L"content", content);
+    dic.SetString(L"payType", pay_type);
+  }
 
   std::string filed = "";
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
@@ -122,21 +153,24 @@ std::string ThirdOrder::PostFiled() {
   return filed;
 }
 
-std::string ThirdOrder::PlaceOrder(const std::string& id, 
-                                const std::string& pay_type,
-                                const std::string& content) {
-  InitWxVerify(id, pay_type, content);
+std::string ThirdOrder::CashPlaceOrder(const std::string& id) {
+  InitWxVerify(id);
   //PlaceOrderSign(id, m_id, trade_type, k_key, ptype, open_id);
-  PlaceOrderSign();
-  http::HttpMethodPost hmp(THIRD_URL);
+  PlaceOrderSign(true);
+
+  std::string url = THIRD_CASH_URL + "com.opentech.cloud.easypay.balance.pay/0.0.1";
+  http::HttpMethodPost hmp(url);
+  //http::HttpMethodPost hmp(THIRD_CASH_URL);
   //std::string headers = "Content-Type: text/xml";
   std::string headers = "x-oapi-pv: 0.0.1";
-  //std::string headers = "com.opentech.cloud.easypay.trade.create: 0.0.1";
+  //std::string headers = "com.opentech.cloud.easypay.balance.pay: 0.0.1";
   hmp.SetHeaders(headers); //api version
-  headers = "x-oapi-sdkv: 0.0.1"; 
+  headers = "x-oapi-sdkv: 0.0.1/c"; 
   hmp.SetHeaders(headers);	  //sdk version
 
-  headers = "x-oapi-sk: 2017042116284843001";	  //证书key
+  headers = "x-oapi-sk: " + T_APP_KEY;	  //证书key
+  hmp.SetHeaders(headers);
+  headers = "x-oapi-sm: MD5";
   hmp.SetHeaders(headers);
   headers = "x-oapi-sign: " + sign;
   hmp.SetHeaders(headers);
@@ -146,6 +180,38 @@ std::string ThirdOrder::PlaceOrder(const std::string& id,
   hmp.GetContent(result);
   //LOG(INFO)<< "http post result:" << result;
   LOG_DEBUG2("http post result: %s", result.c_str());
+  return result;
+}
+
+std::string ThirdOrder::PlaceOrder(const std::string& id, 
+                                const std::string& pay_type,
+                                const std::string& content) {
+  printf("PlaceOrder start..................\n"); //tw test
+  std::string url = THIRD_URL + "com.opentech.cloud.easypay.trade.create/ 0.0.1";
+  InitWxVerify(id, pay_type, content);
+  //PlaceOrderSign(id, m_id, trade_type, k_key, ptype, open_id);
+  PlaceOrderSign();
+  http::HttpMethodPost hmp(url);
+  //std::string headers = "Content-Type: text/xml";
+  std::string headers = "x-oapi-pv: 0.0.1";
+  hmp.SetHeaders(headers); //api version
+  headers = "x-oapi-sdkv: 0.0.1/c"; 
+  hmp.SetHeaders(headers);	  //sdk version
+
+  headers = "x-oapi-sk: " + T_APP_KEY;	  //证书key
+  hmp.SetHeaders(headers);
+  headers = "x-oapi-sm: MD5";
+  hmp.SetHeaders(headers);
+  headers = "x-oapi-sign: " + sign;
+  hmp.SetHeaders(headers);
+///
+  hmp.Post(PostFiled().c_str());
+  std::string result;
+  hmp.GetContent(result);
+  //LOG(INFO)<< "http post result:" << result;
+  LOG_DEBUG2("http post result: %s", result.c_str());
+  printf("PlaceOrder end.......result[%s]...........\n", result.c_str()); //tw test
+  printf("PlaceOrder end..................\n"); //tw test
   return result;
 }
 

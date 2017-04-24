@@ -625,6 +625,139 @@ class ThirdPayOrder {
   base_logic::StringValue* content_;//
   base_logic::StringValue* pay_type_;//
 };
+
+
+class ThirdCashOrder {
+ public:
+  ThirdCashOrder()
+      : uid_(NULL),
+	rec_bank_name_(NULL),
+	amount_(NULL),
+	rec_branch_bank_name_(NULL),
+	rec_card_no_(NULL),
+//	content_(NULL),
+	rec_account_name_(NULL)
+	{
+  }
+
+  ~ThirdCashOrder() {
+    if (uid_) {
+      delete uid_;
+      uid_ = NULL;
+    }
+
+    if (rec_account_name_) {
+      delete rec_account_name_;
+      rec_account_name_ = NULL;
+    }
+
+    if (rec_bank_name_) {
+      delete rec_bank_name_;
+      rec_bank_name_= NULL;
+    }
+    if (amount_) {
+      delete amount_;
+      amount_= NULL;
+    }
+    if (rec_branch_bank_name_) {
+      delete rec_branch_bank_name_;
+      rec_branch_bank_name_= NULL;
+    }
+
+    if (rec_card_no_) {
+      delete rec_card_no_;
+      rec_card_no_= NULL;
+    }
+
+    //if (content_) { delete content_; content_= NULL; }
+
+  }
+
+  bool set_http_packet(base_logic::DictionaryValue* value);
+
+  void set_uid(int64 uid) {
+    uid_ = new base_logic::FundamentalValue(uid);
+  }
+
+  void set_rec_bank_name(std::string& rec_bank_name) {
+    rec_bank_name_ = new base_logic::StringValue(rec_bank_name);
+  }
+
+  void set_amount(double amount) {
+    amount_ = new base_logic::FundamentalValue(amount);
+  }
+
+  void set_rec_account_name(const std::string& rec_account_name) {
+    rec_account_name_ = new base_logic::StringValue(rec_account_name);
+  }
+  void set_rec_branch_bank_name(const std::string& rec_branch_bank_name) {
+    rec_branch_bank_name_ = new base_logic::StringValue(rec_branch_bank_name);
+  }
+  void set_rec_card_no(const std::string& rec_card_no) {
+    rec_card_no_ = new base_logic::StringValue(rec_card_no);
+  }
+ // void set_content(const std::string& content) {
+   // content_ = new base_logic::StringValue(content);
+  //}
+
+  int64 uid() {
+    int64 uid;
+    if (uid_)
+      uid_->GetAsBigInteger(&uid);
+    return uid;
+  }
+  const std::string rec_bank_name() {
+    std::string rec_bank_name;
+    if (rec_bank_name_)
+      rec_bank_name_->GetAsString(&rec_bank_name);
+    return rec_bank_name;
+  }
+
+  double amount() {
+    double amount;
+    if (amount_)
+      amount_->GetAsReal(&amount);
+    return amount;
+  }
+
+  const std::string rec_account_name() {
+    std::string rec_account_name;
+    if (rec_account_name_)
+      rec_account_name_->GetAsString(&rec_account_name);
+    return rec_account_name;
+  }
+  const std::string rec_branch_bank_name() {
+    std::string rec_branch_bank_name;
+    if (rec_branch_bank_name_)
+      rec_branch_bank_name_->GetAsString(&rec_branch_bank_name);
+    return rec_branch_bank_name;
+  }
+  const std::string rec_card_no() {
+    std::string rec_card_no;
+    if (rec_card_no_)
+      rec_card_no_->GetAsString(&rec_card_no);
+    return rec_card_no;
+  }
+ /* const std::string content() {
+    std::string content;
+    if (content_)
+      content_->GetAsString(&content);
+    return content;
+  }
+*/
+
+ private:
+  base_logic::FundamentalValue* uid_;
+
+//  base_logic::StringValue* content_;//
+
+  base_logic::FundamentalValue* amount_;  // 订单总价  单位 分
+  base_logic::StringValue* rec_bank_name_;//recivebankname
+  base_logic::StringValue* rec_branch_bank_name_;//
+  base_logic::StringValue* rec_card_no_;//
+  base_logic::StringValue* rec_account_name_;//收款人开户名称
+};
+
 //end Third
 
 }
@@ -776,6 +909,106 @@ class ThirdPayOrder {
  private:
   base_logic::StringValue* payment_info_;
   //base_logic::StringValue* rid_;  //为兼容暂时使用string
+  base_logic::DictionaryValue* value_;
+};
+
+
+
+class ThirdCashOrder {
+ public:
+  ThirdCashOrder()
+      : merchant_no_(NULL),
+        out_pay_no_(NULL),
+        amount_(NULL),
+        transfer_amount_(NULL),
+        fee_(NULL),
+        pay_no_(NULL),
+        status_(NULL)
+      {
+  }
+
+  ~ThirdCashOrder() {
+    if (merchant_no_) {
+      delete merchant_no_;
+      merchant_no_= NULL;
+    }
+    if (out_pay_no_) {
+      delete out_pay_no_;
+      out_pay_no_= NULL;
+    }
+    if (amount_) {
+      delete amount_;
+      amount_= NULL;
+    }
+    if (transfer_amount_) {
+      delete transfer_amount_;
+      transfer_amount_= NULL;
+    }
+    if (fee_) {
+      delete fee_;
+      fee_= NULL;
+    }
+    if (pay_no_) {
+      delete pay_no_;
+      pay_no_= NULL;
+    }
+    if (status_) {
+      delete status_;
+      status_= NULL;
+    }
+  }
+  void set_merchant_no(const std::string& merchant_no) {
+    merchant_no_ = new base_logic::StringValue(merchant_no);
+  }
+
+  void set_out_pay_no(const std::string& out_pay_no) {
+    out_pay_no_ = new base_logic::StringValue(out_pay_no);
+  }
+
+  void set_amount(const std::string& amount) {
+    amount_ = new base_logic::StringValue(amount);
+  }
+  void set_transfer_amount(const std::string& transfer_amount) {
+    transfer_amount_ = new base_logic::StringValue(transfer_amount);
+  }
+  void set_fee(const std::string& fee) {
+    fee_= new base_logic::StringValue(fee);
+  }
+  void set_pay_no(const std::string& pay_no) {
+    pay_no_ = new base_logic::StringValue(pay_no);
+  }
+  void set_status(const std::string& status) {
+    status_ = new base_logic::StringValue(status);
+  }
+  base_logic::DictionaryValue* get() {
+    value_ = new base_logic::DictionaryValue();
+    if (merchant_no_ != NULL)
+      value_->Set(L"merchantNo", merchant_no_);
+
+    if (out_pay_no_ != NULL)
+      value_->Set(L"outPayNo", out_pay_no_);
+    if (amount_ != NULL)
+      value_->Set(L"amount", amount_ );
+    if (transfer_amount_ != NULL)
+      value_->Set(L"transferAmount", transfer_amount_ );
+    if (fee_ != NULL)
+      value_->Set(L"fee", fee_);
+    if (pay_no_ != NULL)
+      value_->Set(L"payNo", pay_no_);
+    if (status_ != NULL)
+      value_->Set(L"status", status_);
+    return value_;
+  }
+
+ private:
+  base_logic::StringValue* merchant_no_;
+  base_logic::StringValue* out_pay_no_;
+  base_logic::StringValue*  amount_;
+  base_logic::StringValue* transfer_amount_;
+  base_logic::StringValue* fee_;
+  base_logic::StringValue* pay_no_;
+  base_logic::StringValue* status_;
+
   base_logic::DictionaryValue* value_;
 };
 

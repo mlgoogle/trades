@@ -11,16 +11,19 @@
 const std::string T_APPID = "th9dc39aec13ee3158";
 const std::string T_MCH_ID = "MNYH54001EBOM"; //商户号
 
-const std::string T_MPID = "the9f0932fb23e8f8a";
+//const std::string T_MPID = "the9f0932fb23e8f8a";
 
 const std::string T_APP_KEY = "2017042116284843001"; //证书编号
 
 const std::string T_APP_TRADE_TYPE = "APP";
 
-const std::string THIRD_URL = "https://gw.dev.uqiantu.net/native/";
+const std::string THIRD_URL = "https://gw.uqiantu.net/native/";
+const std::string THIRD_CASH_URL = "https://gw.uqiantu.net/native/";
 const std::string THIRD_PACKAGE = "Sign=ThirdPay";
 const std::string T_NOTIFY_URL =
     "http://139.224.34.22/cgi-bin/flight/pay/v1/third_callback.fcgi";
+const std::string T_CASH_NOTIFY_URL =
+    "http://139.224.34.22/cgi-bin/flight/pay/v1/third_cash_callback.fcgi";
 
 /*
  */
@@ -33,6 +36,18 @@ class ThirdOrder {
 
   inline void set_body(std::string b) {
     body = b;
+  }
+  inline void set_rec_bank_name(const std::string &value) {
+    rec_bank_name = value;
+  }
+  inline void set_rec_branch_bank_name(const std::string &value) {
+    rec_branch_bank_name = value;
+  }
+  inline void set_rec_card_no(const std::string &value) {
+    rec_card_no = value;
+  }
+  inline void set_rec_account_name(const std::string &value) {
+    rec_account_name = value;
   }
   inline void set_out_trade_no(std::string oid) {
     out_trade_no = oid;
@@ -53,6 +68,7 @@ class ThirdOrder {
   void PreSerialize(base_logic::DictionaryValue* dic);
   std::string PlaceOrder();
   std::string PlaceOrder(const std::string& id, const std::string& pay_type,const std::string &content);
+  std::string CashPlaceOrder(const std::string& id);
 
   inline std::string get_appid() {
     return appid;
@@ -94,8 +110,9 @@ class ThirdOrder {
 //    "<trade_type>APP</trade_type>"
 //    "<sign>2EAD4CA62CA2677D0C307CDDF6D6BC89</sign>"
 //"</xml>";
-  std::string PostFiled();
+  std::string PostFiled(bool iscash=false);
   void InitWxVerify();
+  void InitWxVerify(const std::string& id);
   void InitWxVerify(const std::string& id, 
                     const std::string& pay_type,
                     const std::string& content);
@@ -125,7 +142,7 @@ class ThirdOrder {
 //
 //  stringSignTemp="stringA&key=192006250b4c09247ec02edce69f6a2d"
 //  sign=MD5(stringSignTemp).toUpperCase()="9A0A8659F005D6984697E2CA0A9CF3B7"
-  void PlaceOrderSign();
+  void PlaceOrderSign(bool iscash = false);
   //void PlaceOrderSign(const std::string& id, const std::string& m_id, const std::string& t_type,const std::string& k_key,
     //                  const int32 ptype,const std::string& open_id);
  private:
@@ -140,8 +157,6 @@ class ThirdOrder {
   //商户key 参与sign签名-不做其他用途
   std::string key;
 
-  //openid
-  std::string open_id;
   //下单成功
 
   //微信生成的预支付回话标识，用于后续接口调用中使用，该值有效期为2小时
@@ -152,7 +167,7 @@ class ThirdOrder {
   std::string package;
   //时间戳
   std::string timestamp;
-//----------------------------------------------------------------------------------------------------------------
+//充值----------------------------------------------------------------------------------------------------------------
   //商户系统内部的订单号,32个字符内、可包含字母
   std::string out_trade_no;
   
@@ -169,6 +184,18 @@ class ThirdOrder {
   std::string pay_type;		//支付类型
   std::string content;		//交易描述
   std::string payment_info;
+//提现----------------------------------------------------------------------------------------------------------------
+//
+  std::string rec_bank_name;
+  std::string rec_branch_bank_name;
+  std::string rec_card_no;
+  std::string rec_account_name;
+//ret
+//
+  int transfer_amount; //实际到账金额
+  int fee; //代收手续费
+  std::string pay_no;
+  std::string status;
 };
 
 }

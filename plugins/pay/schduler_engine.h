@@ -33,8 +33,8 @@ class PayManager {
 
   bool OnThirdCreateCashOrder(const int socket, const int64 session,
                        const int32 reversed, const int64 uid,
-                       const double price,const std::string& pay_type,
-                       const std::string& content);
+                       const double price,const std::string& rec_bank_name, const std::string& rec_bra_bank_name, 
+		       const std::string &rec_card_no, const std::string &rec_account_name);
   bool OnThirdCreateOrder(const int socket, const int64 session,
                        const int32 reversed, const int64 uid,
                        const double price,const std::string& pay_type,
@@ -59,10 +59,11 @@ class PayManager {
                const double price,const std::string& pay_type, const std::string& content,
                pay_logic::ThirdOrder& third_order);
   bool ThirdCashOrder(const int socket, const int64 rid,
-               const double price,const std::string& pay_type, const std::string& content,
+               const double price,const std::string& rec_bank_name, const std::string& rec_bra_bank_name, const std::string &rec_card_no, const std::string &rec_account_name,
                pay_logic::ThirdOrder& third_order);
 
   bool ParserThirdOrderResult(std::string& result, std::string& prepay_id);
+  bool ParserThirdCashOrderResult(std::string& result, std::string& prepay_id);
  private:
   pay_logic::PayDB* pay_db_;
   PayCache *pay_cache_;

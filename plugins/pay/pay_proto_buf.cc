@@ -187,14 +187,14 @@ bool ThirdPayOrder::set_http_packet(base_logic::DictionaryValue* value) {
   r = value->GetBigInteger(L"id", &uid);
   if (r)
     set_uid(uid);
-  else
-    return false;
+  //else
+   // return false;
 
   r = value->GetString(L"merchantNo", &temp);
   if (r)
     set_merchant_no(temp);
-  else
-    return false;
+  //else
+   // return false;
 
   r = value->GetReal(L"amount", &amount);
   if (r)
@@ -217,14 +217,14 @@ bool ThirdPayOrder::set_http_packet(base_logic::DictionaryValue* value) {
   r = value->GetString(L"currency", &temp);
   if (r)
     set_currency(temp);
-  else
-    return false;
+  //else
+    //return false;
 
   r = value->GetString(L"outTradeNo", &temp);
   if (r)
     set_out_trade_no(temp);
-  else
-    return false;
+  //else
+    //return false;
   r = value->GetString(L"content", &temp);
   if (r)
     set_content(temp);
@@ -232,6 +232,59 @@ bool ThirdPayOrder::set_http_packet(base_logic::DictionaryValue* value) {
   return true;
 }
 
+
+bool ThirdCashOrder::set_http_packet(base_logic::DictionaryValue* value) {
+  int32 err = 0;
+  bool r = false;
+  int64 uid;
+  std::string temp;
+  int32 rec_bank_name = 0;
+  int64 big_rec_bank_name = 0;
+  double amount;
+  if (value == NULL)
+    return false;
+
+  r = value->GetBigInteger(L"id", &uid);
+  if (r)
+    set_uid(uid);
+  else
+    return false;
+
+  r = value->GetReal(L"amount", &amount);
+  if (r)
+    set_amount(amount);
+  else {
+    int64 big_amount = 0;
+    r = value->GetBigInteger(L"amount", &big_amount);
+    if (!r)
+      return false;
+    amount = big_amount;
+    set_amount(amount);
+  }
+
+  r = value->GetString(L"receiverBankName", &temp);
+  if (r)
+    set_rec_bank_name(temp);
+  else
+    return false;
+
+  r = value->GetString(L"receiverBranchBankName", &temp);
+  if (r)
+    set_rec_branch_bank_name(temp);
+  else
+    return false;
+
+  r = value->GetString(L"receiverCardNo", &temp);
+  if (r)
+    set_rec_card_no(temp);
+  else
+    return false;
+  r = value->GetString(L"receiverAccountName", &temp);
+  if (r)
+    set_rec_account_name(temp);
+
+  return true;
+}
 }
 
 }
