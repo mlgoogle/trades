@@ -80,7 +80,7 @@ bool Paylogic::OnPayConnect(struct server *srv, const int socket) {
 
 bool Paylogic::OnPayMessage(struct server *srv, const int socket,
                             const void *msg, const int len) {
-  printf("operator_code............[],\n"); //tw test
+  LOG_ERROR2("start ...........Error socket %d", socket);
   bool r = false;
   struct PacketHead *packet = NULL;
   if (srv == NULL || socket < 0 || msg == NULL || len < PACKET_HEAD_LENGTH)
@@ -94,7 +94,7 @@ bool Paylogic::OnPayMessage(struct server *srv, const int socket,
 	
 try
 {
-  printf("operator_code[%d],\n", packet->operate_code); //tw test
+  LOG_ERROR2("operator_code[%d]", packet->operate_code); //tw test
   switch (packet->operate_code) {
     case R_WEIXIN_PAY: {
       OnWXPayOrder(srv, socket, packet);
@@ -111,6 +111,7 @@ try
 
     case R_THIRD_PAY: {
       OnThirdPayOrder(srv, socket, packet);
+	  LOG_ERROR2("operator_code[%d]", packet->operate_code); //tw test
       break;
     }
     case R_THIRD_CLT: {
@@ -119,14 +120,17 @@ try
     }
     case R_THIRD_SVC: {
       OnThirdPaySever(srv, socket, packet);
+      break;
     }
     case R_THIRD_CASH: {
       OnThirdCashOrder(srv, socket, packet);
       break;
     }
     default:
+	  LOG_ERROR2("default_____________________[%d]", packet->operate_code); //tw test
       break;
   }
+  LOG_ERROR2("default_____________________[%d]", packet->operate_code); //tw test
 }
 catch (...)
 {
@@ -240,8 +244,8 @@ bool Paylogic::OnWXPaySever(struct server* srv, int socket,
 
 bool Paylogic::OnThirdPayOrder(struct server* srv, int socket,
                             struct PacketHead *packet) {
-  printf("tw________packet_length[%d],\n", packet->packet_length); //tw test
-  LOG_DEBUG2("tw________packet_length[%d],\n", packet->packet_length); //tw test
+  LOG_ERROR2("tw________packet_length[%d]", packet->packet_length); //tw test
+  LOG_DEBUG2("tw________packet_length[%d]", packet->packet_length); //tw test
   pay_logic::net_request::ThirdPayOrder third_pay_order;
   if (packet->packet_length <= PACKET_HEAD_LENGTH) {
     send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
@@ -261,7 +265,7 @@ bool Paylogic::OnThirdPayOrder(struct server* srv, int socket,
       third_pay_order.content());
 
 
-  printf("tw________packet_length....end[%d],\n", packet->packet_length); //tw test
+  LOG_ERROR2("tw________packet_length....end[%d]", packet->packet_length); //tw test
   return true;
 }
 

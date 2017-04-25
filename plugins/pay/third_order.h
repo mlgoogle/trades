@@ -6,6 +6,7 @@
 
 #include <string>
 #include "logic/base_values.h"
+#include "http/http_method.h"
 
 
 const std::string T_APPID = "th9dc39aec13ee3158";
@@ -14,6 +15,7 @@ const std::string T_MCH_ID = "MNYH54001EBOM"; //商户号
 //const std::string T_MPID = "the9f0932fb23e8f8a";
 
 const std::string T_APP_KEY = "2017042116284843001"; //证书编号
+const std::string T_MD5_KEY = "RPOUDPWHNMJETKCJADHFYQBEMJRVDVHP"; //证书编号
 
 const std::string T_APP_TRADE_TYPE = "APP";
 
@@ -117,6 +119,7 @@ class ThirdOrder {
                     const std::string& pay_type,
                     const std::string& content);
 
+  void Set_Headers(http::HttpMethodPost &hmp);
 //  微信下单签名
 //  签名算法
 //  签名生成的通用步骤如下：
@@ -142,7 +145,7 @@ class ThirdOrder {
 //
 //  stringSignTemp="stringA&key=192006250b4c09247ec02edce69f6a2d"
 //  sign=MD5(stringSignTemp).toUpperCase()="9A0A8659F005D6984697E2CA0A9CF3B7"
-  void PlaceOrderSign(bool iscash = false);
+  void PlaceOrderSign(const std::string &body, bool iscash = false);
   //void PlaceOrderSign(const std::string& id, const std::string& m_id, const std::string& t_type,const std::string& k_key,
     //                  const int32 ptype,const std::string& open_id);
  private:

@@ -167,7 +167,7 @@ bool PayManager::OnThirdCreateOrder(const int socket, const int64 session,
   //创建订单号
   pay_logic::ThirdOrder third_order;
   int64 rid = base::SysRadom::GetInstance()->GetRandomID();
-  printf("tw___1111_____price[%lf],pay_type[%s],content[%s]\n", price, pay_type.c_str(), content.c_str()); //tw test
+  LOG_ERROR2("tw___1111_____price[%lf],pay_type[%s],content[%s]\n", price, pay_type.c_str(), content.c_str()); //tw test
   //base_logic::DictionaryValue recharge_dic;
   bool r = ThirdOrder(socket,  rid, price, pay_type,content ,third_order);
   if (!r) {
@@ -175,7 +175,7 @@ bool PayManager::OnThirdCreateOrder(const int socket, const int64 session,
     return false;
   }
 
-  printf("tw___222_____price[%lf],pay_type[%s],content[%s]\n", price, pay_type.c_str(), content.c_str()); //tw test
+  LOG_ERROR2("tw___222_____price[%lf],pay_type[%s],content[%s]\n", price, pay_type.c_str(), content.c_str()); //tw test
   r = pay_db_->OnCreateRechargeOrder(uid, rid, price, UNIPNPAY);
   if (!r) {
     send_error(socket, ERROR_TYPE, STOAGE_ORDER_ERROR, session);
@@ -192,7 +192,7 @@ bool PayManager::OnThirdCreateOrder(const int socket, const int64 session,
     package = "prepay_id=" + third_order.get_prepayid();
   }
 */
-  printf("tw___333_____price[%lf],pay_type[%s],content[%s]\n", price, pay_type.c_str(), content.c_str()); //tw test
+  LOG_ERROR2("tw___333_____price[%lf],pay_type[%s],content[%s]\n", price, pay_type.c_str(), content.c_str()); //tw test
   MAKE_HEAD(packet_control, S_THIRD_PAY, USER_TYPE, 0, session, 0);
   r_third_order.set_payment_info(third_order.get_payment_info());
   //r_third_order.set_partnerid(third_order.get_partnerid());
@@ -287,7 +287,7 @@ bool PayManager::ThirdOrder(const int socket,
                          const std::string &pay_type,const std::string& content, 
                          pay_logic::ThirdOrder& third_order) {
 
-  printf("tw________price[%lf],pay_type[%s],content[%s]\n", price, pay_type.c_str(), content.c_str()); //tw test
+  LOG_ERROR2("tw________price[%lf],pay_type[%s],content[%s]\n", price, pay_type.c_str(), content.c_str()); //tw test
   std::string prepay_id;
   std::string ip;
   std::string app_id;
