@@ -50,6 +50,14 @@ void ThirdOrder::InitWxVerify() {
   nonce_str = logic::SomeUtils::RandomString(32);
   //out_trade_no += logic::SomeUtils::RandomString(6);
 }
+static std::string Upper(std::string &text) {
+  for (unsigned int i = 0; i < text.length(); i ++)
+  {
+	if (text[i] >= 'a' && text[i] <= 'z')
+		text[i] = text[i] - 32;
+  }
+return text;
+}
 
 void ThirdOrder::PlaceOrderSign(const std::string &body, bool iscash) {
   std::stringstream ss;
@@ -96,6 +104,7 @@ void ThirdOrder::PlaceOrderSign(const std::string &body, bool iscash) {
   base::MD5Sum md5sum(ss.str());
   LOG_DEBUG2("THIRD_ORDER_SIGN_MD5 after: %s",md5sum.GetHash().c_str());
   sign = md5sum.GetHash();
+  Upper(sign);
 }
 
 //APP充值
@@ -117,10 +126,10 @@ void ThirdOrder::PreSign() {
         << "&key=" << key;
   }
   //LOG(INFO)<< "WX_PRE_SIGN before:" << ss.str();
-  LOG_DEBUG2("WX_ORDER_SIGN before: %s",ss.str().c_str());
+  LOG_DEBUG2("Third_ORDER_SIGN before: %s",ss.str().c_str());
   base::MD5Sum md5sum(ss.str());
   //LOG(INFO)<< "WX_PRE_SIGN_MD5 after:" << md5sum.GetHash();
-  LOG_DEBUG2("WX_ORDER_SIGN_MD5 after: %s",md5sum.GetHash().c_str());
+  LOG_DEBUG2("third_ORDER_SIGN_MD5 after: %s",md5sum.GetHash().c_str());
   prepaysign = md5sum.GetHash();
 }
 
@@ -211,6 +220,18 @@ std::string ThirdOrder::PlaceOrder(const std::string& id,
   hmp.Post(body.c_str());
   std::string result;
   hmp.GetContent(result);
+
+////get header message
+  std::string err_key = "x-oapi-error-code";
+  MIG_VALUE err_value;
+  
+  hmp.GetHeader(err_key, err_value);
+  MIG_VALUE::iterator iter;
+  for (iter = err_value.begin(); iter != err_value.end(); iter++)
+    LOG_DEBUG2("err_value_____[%s]", iter->c_str());
+
+/////
+
   //LOG(INFO)<< "http post result:" << result;
   LOG_DEBUG2("http post result: %s", result.c_str());
   LOG_ERROR2("PlaceOrder end.......result[%s]...........\n", result.c_str()); //tw test
