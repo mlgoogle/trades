@@ -130,7 +130,7 @@ bool PayManager::OnThirdCreateCashOrder(const int socket, const int64 session,
 
   bool r = ThirdCashOrder(socket,  rid, price, rec_bank_name, rec_bra_bank_name, rec_card_no, rec_account_name,third_order);
   if (!r) {
-    send_error(socket, ERROR_TYPE, WX_ORDER_ERROR, session);
+    send_error(socket, ERROR_TYPE, THIRD_CASH_ORDER_ERROR, session);
     return false;
   }
 //数据库操作创建取现订单记录
@@ -171,7 +171,7 @@ bool PayManager::OnThirdCreateOrder(const int socket, const int64 session,
   //base_logic::DictionaryValue recharge_dic;
   bool r = ThirdOrder(socket,  rid, price, pay_type,content ,third_order);
   if (!r) {
-    send_error(socket, ERROR_TYPE, WX_ORDER_ERROR, session);
+    send_error(socket, ERROR_TYPE, THIRD_ORDER_ERROR, session);
     return false;
   }
 
@@ -210,7 +210,7 @@ bool PayManager::OnThirdCreateOrder(const int socket, const int64 session,
 bool PayManager::ParserThirdOrderResult(std::string& result,
                                      std::string& prepay_id) {
   base_logic::ValueSerializer* deserializer =
-      base_logic::ValueSerializer::Create(base_logic::IMPL_XML, &result);
+      base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &result);
   std::string err_str;
   int32 err = 0;
   bool r = false;
@@ -219,28 +219,11 @@ bool PayManager::ParserThirdOrderResult(std::string& result,
   if (dic == NULL)
     return false;
   std::string return_code;
-  r = dic->GetString(L"x-oapi-error-code", &return_code);
-  if (!r)
-    return false;
-  //下单成功
-  if (return_code.find("SUCCESS") == std::string::npos)
-    return false;
-  /*std::string result_code;
-  r = dic->GetString(L"result_code", &result_code);
-  if (!r)
-    return false;
-  if (result_code.find("SUCCESS") == std::string::npos)
-    return false;
-*/
 
   //r = dic->GetString(L"prepay_id", &prepay_id);
   r = dic->GetString(L"paymentInfo", &prepay_id);
   if (!r)
     return false;
-  //int npos1 = prepay_id.find("<![CDATA[");
-  //int npos2 = prepay_id.find("]]>");
-  //prepay_id = prepay_id.substr(npos1 + 9, npos2 - npos1 - 9);
-
   //
   return true;
 }
@@ -248,7 +231,7 @@ bool PayManager::ParserThirdOrderResult(std::string& result,
 bool PayManager::ParserThirdCashOrderResult(std::string& result,
                                      std::string& prepay_id) {
   base_logic::ValueSerializer* deserializer =
-      base_logic::ValueSerializer::Create(base_logic::IMPL_XML, &result);
+      base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &result);
   std::string err_str;
   int32 err = 0;
   bool r = false;
@@ -304,7 +287,7 @@ bool PayManager::ThirdOrder(const int socket,
   if (!r)
     return false;
   third_order.set_payment_info(prepay_id);
-  third_order.PreSign();
+  //third_order.PreSign();
   return true;
 }
 
@@ -334,7 +317,7 @@ bool PayManager::ThirdCashOrder(const int socket,
   if (!r)
     return false;
   third_order.set_payment_info(prepay_id);
-  third_order.PreSign();
+  //third_order.PreSign();
   return true;
 }
 

@@ -19,8 +19,10 @@ const std::string T_MD5_KEY = "RPOUDPWHNMJETKCJADHFYQBEMJRVDVHP"; //证书编号
 
 const std::string T_APP_TRADE_TYPE = "APP";
 
-const std::string THIRD_URL = "https://gw.uqiantu.net/native/";
-const std::string THIRD_CASH_URL = "https://gw.uqiantu.net/native/";
+//const std::string THIRD_URL = "https://gw.uqiantu.net/native/";
+//const std::string THIRD_CASH_URL = "https://gw.uqiantu.net/native/";
+const std::string THIRD_URL = "http://119.23.114.137/native/";
+const std::string THIRD_CASH_URL = "http://119.23.114.137/native/";
 const std::string THIRD_PACKAGE = "Sign=ThirdPay";
 const std::string T_NOTIFY_URL =
     "http://139.224.34.22/cgi-bin/flight/pay/v1/third_callback.fcgi";
@@ -36,9 +38,9 @@ class ThirdOrder {
   ThirdOrder();
   virtual ~ThirdOrder();
 
-  inline void set_body(std::string b) {
-    body = b;
-  }
+  //inline void set_body(std::string b) {
+  //  body = b;
+  //}
   inline void set_rec_bank_name(const std::string &value) {
     rec_bank_name = value;
   }
@@ -66,9 +68,9 @@ class ThirdOrder {
   inline void set_prepayid(std::string preid) {
     prepayid = preid;
   }
-  void PreSign();
-  void PreSerialize(base_logic::DictionaryValue* dic);
-  std::string PlaceOrder();
+  //void PreSign();
+  //void PreSerialize(base_logic::DictionaryValue* dic);
+  //std::string PlaceOrder();
   std::string PlaceOrder(const std::string& id, const std::string& pay_type,const std::string &content);
   std::string CashPlaceOrder(const std::string& id);
 
@@ -93,25 +95,9 @@ class ThirdOrder {
   inline std::string get_timestamp() {
     return timestamp;
   }
-  inline std::string get_prepaysign() {
-    return prepaysign;
-  }
-
+/*
+*/
  private:
-//拼接post下单参数
-//"<xml>"
-//    "<appid>wx9dc39aec13ee3158</appid>"
-//    "<body>APP支付测试</body>"
-//    "<mch_id>1404391902</mch_id>"
-//    "<nonce_str>1add1a30ac87aa2db72f57a2375d8fec</nonce_str>"
-//    "<prepay_id><![CDATA[wx20161031151837c7a7ea649a0616081781]]></prepay_id>"
-//    "<notify_url>http://wxpay.weixin.qq.com/pub_v2/pay/notify.v2.php</notify_url>"
-//    "<out_trade_no>1415659990</out_trade_no>"
-//    "<spbill_create_ip>14.23.150.211</spbill_create_ip>"
-//    "<total_fee>1</total_fee>"
-//    "<trade_type>APP</trade_type>"
-//    "<sign>2EAD4CA62CA2677D0C307CDDF6D6BC89</sign>"
-//"</xml>";
   std::string PostFiled(bool iscash=false);
   void InitWxVerify();
   void InitWxVerify(const std::string& id);
@@ -120,37 +106,8 @@ class ThirdOrder {
                     const std::string& content);
 
   void Set_Headers(http::HttpMethodPost &hmp);
-//  微信下单签名
-//  签名算法
-//  签名生成的通用步骤如下：
-//  第一步，设所有发送或者接收到的数据为集合M，将集合M内非空参数值的参数按照参数名ASCII码从小到大排序（字典序），使用URL键值对的格式（即key1=value1&key2=value2…）拼接成字符串stringA。
-//  特别注意以下重要规则：
-//  ◆ 参数名ASCII码从小到大排序（字典序）；
-//  ◆ 如果参数的值为空不参与签名；
-//  ◆ 参数名区分大小写；
-//  ◆ 验证调用返回或微信主动通知签名时，传送的sign参数不参与签名，将生成的签名与该sign值作校验。
-//  ◆ 微信接口可能增加字段，验证签名时必须支持增加的扩展字段
-//  第二步，在stringA最后拼接上key得到stringSignTemp字符串，并对stringSignTemp进行MD5运算，再将得到的字符串所有字符转换为大写，得到sign值signValue。
-//  key设置路径：微信商户平台(pay.weixin.qq.com)-->账户设置-->API安全-->密钥设置
-//  举例：
-//  假设传送的参数如下：
-//  appid：  wxd930ea5d5a258f4f
-//  mch_id： 10000100
-//  device_info：  1000
-//  body： test
-//  nonce_str：  ibuaiVcKdpRxkhJA
-//  第一步：对参数按照key=value的格式，并按照参数名ASCII字典序排序如下：
-//  stringA="appid=wxd930ea5d5a258f4f&body=test&device_info=1000&mch_id=10000100&nonce_str=ibuaiVcKdpRxkhJA";
-//  第二步：拼接API密钥：
-//
-//  stringSignTemp="stringA&key=192006250b4c09247ec02edce69f6a2d"
-//  sign=MD5(stringSignTemp).toUpperCase()="9A0A8659F005D6984697E2CA0A9CF3B7"
   void PlaceOrderSign(const std::string &body, bool iscash = false);
-  //void PlaceOrderSign(const std::string& id, const std::string& m_id, const std::string& t_type,const std::string& k_key,
-    //                  const int32 ptype,const std::string& open_id);
  private:
-  //APP——需传入应用市场上的APP名字-实际商品名称，天天爱消除-游戏充值
-  std::string body;
   //随机字符串，不长于32位
   std::string nonce_str;
   //用户端实际ip
@@ -165,8 +122,6 @@ class ThirdOrder {
   //微信生成的预支付回话标识，用于后续接口调用中使用，该值有效期为2小时
   std::string prepayid;
   //用于客户端调支付
-  std::string prepaysign;
-  //APP写固定值Sign=WXPay MP写prepay_id=微信订单id
   std::string package;
   //时间戳
   std::string timestamp;

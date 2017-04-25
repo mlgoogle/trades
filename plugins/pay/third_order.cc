@@ -74,30 +74,6 @@ void ThirdOrder::PlaceOrderSign(const std::string &body, bool iscash) {
    << "&x-oapi-sm=MD5"
    << "&" << body;
 
-/*
-  ss << "&{\"amount\":\"" << total_fee << "\","
-     << "\"callbackURL\":\"" << notify_url << "\",";
-  if (iscash)
-  {
-     ss << "\"merchantNo\":\"" << mch_id << "\","
-	<< "\"outPayNo\":\"" << out_trade_no << "\"," 
-        << "\"payPassword\":\"" << PASSWORD << "\","
-        << "\"receiverAccountName\":\"" << rec_account_name << "\","
-        << "\"receiverBankName\":\"" << rec_bank_name << "\","
-        << "\"receiverBranchBankName\":\"" << rec_branch_bank_name << "\","
-        << "\"receiverCardNo\":\"" << rec_card_no << "\"";
-  }
-  else
-  {
-     ss << "\"content\":\"" << content << "\"," 
-        << "\"merchantNo\":\"" << mch_id << "\","
-        << "\"outTradeNo\":\"" << out_trade_no  << "\","
-        << "\"payType\":\"" << pay_type << "\"";
-  }
-  ss << "}";
-*/
-//<< "&spbill_create_ip="
-//     << spbill_create_ip 
   ss << "&" << T_MD5_KEY;
 
   LOG_DEBUG2("THIRD_ORDER_SIGN before: %s",ss.str().c_str());
@@ -105,33 +81,11 @@ void ThirdOrder::PlaceOrderSign(const std::string &body, bool iscash) {
   LOG_DEBUG2("THIRD_ORDER_SIGN_MD5 after: %s",md5sum.GetHash().c_str());
   sign = md5sum.GetHash();
   Upper(sign);
+  LOG_DEBUG2("THIRD_ORDER_SIGN_MD5 after2___________: %s",md5sum.GetHash().c_str());
 }
 
-//APP充值
-void ThirdOrder::PreSign() {
-  //重新赋值 nonce_str
-  nonce_str = logic::SomeUtils::RandomString(32);
-  std::stringstream ss;
-  ss << time(NULL);
-  timestamp = ss.str();
-  ss.str("");
-  ss.clear();
-  if (trade_type == T_APP_TRADE_TYPE) {
-    ss << "appid=" << appid << "&noncestr=" << nonce_str << "&package=Sign=WXPay"
-          << "&partnerid=" << mch_id << "&prepayid=" << prepayid << "&timestamp="
-          << timestamp << "&key=" << key;
-  } else {
-    ss << "appId=" << appid << "&nonceStr=" << nonce_str << "&package="
-        << "prepayid=" << prepayid << "&signType=MD5&timeStamp=" << timestamp
-        << "&key=" << key;
-  }
-  //LOG(INFO)<< "WX_PRE_SIGN before:" << ss.str();
-  LOG_DEBUG2("Third_ORDER_SIGN before: %s",ss.str().c_str());
-  base::MD5Sum md5sum(ss.str());
-  //LOG(INFO)<< "WX_PRE_SIGN_MD5 after:" << md5sum.GetHash();
-  LOG_DEBUG2("third_ORDER_SIGN_MD5 after: %s",md5sum.GetHash().c_str());
-  prepaysign = md5sum.GetHash();
-}
+/*
+*/
 
 std::string ThirdOrder::PostFiled(bool iscash) {
   base_logic::DictionaryValue dic;
@@ -239,36 +193,5 @@ std::string ThirdOrder::PlaceOrder(const std::string& id,
   return result;
 }
 
-std::string ThirdOrder::PlaceOrder() {
-  InitWxVerify();
-  //PlaceOrderSign();
-  http::HttpMethodPost hmp(THIRD_URL);
-  std::string headers = "Content-Type: text/xml";
-  hmp.SetHeaders(headers);
-  hmp.Post(PostFiled().c_str());
-  std::string result;
-  hmp.GetContent(result);
-  //LOG(INFO)<< "http post result:" << result;
-  LOG_DEBUG2("http post result: %s", result.c_str());
-  return result;
-}
-
-void ThirdOrder::PreSerialize(base_logic::DictionaryValue* dic) {
-  if (dic != NULL) {
-    dic->SetString(L"appid", appid);
-    dic->SetString(L"partnerid", mch_id);
-    dic->SetString(L"prepayid", prepayid);
-    if (trade_type == "APP")
-      dic->SetString(L"package", package);
-    else {
-      std::string str_package;
-      str_package = "prepayid=" + prepayid;
-      dic->SetString(L"package", str_package);
-    }
-    dic->SetString(L"noncestr", nonce_str);
-    dic->SetString(L"timestamp", timestamp);
-    dic->SetString(L"sign", prepaysign);
-  }
-}
-}
+}//namespace pay_logic
 
