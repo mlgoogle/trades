@@ -127,5 +127,30 @@ void PayDB::CallUpdateCallBackRechargeOrder(void* param,
   dict->Set(L"resultvalue", (base_logic::Value *) (info_value));
 }
 
+
+bool PayDB::OnCreateWithdrawOrder(const int64 uid, const int64 rid,
+                                  const double price, const int64 bid) {
+  bool r = false;
+  base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
+
+  std::string sql;
+  //int64 bigr_type = rtype;
+  //call actuals.proc_CreateRechargeOrder(32,12324141412,0.01,1)
+  sql = "call proc_Withdraw("
+      + base::BasicUtil::StringUtil::Int64ToString(uid) + ","
+      + base::BasicUtil::StringUtil::Int64ToString(rid) + ","
+      + base::BasicUtil::StringUtil::Int64ToString(bid) + ","
+      + base::BasicUtil::StringUtil::DoubleToString(price) + ","
+      + base::BasicUtil::StringUtil::Int64ToString(0) + ");";
+  dict->SetString(L"sql", sql);
+  r = mysql_engine_->ReadData(0, (base_logic::Value *) (dict), NULL);
+
+  if (dict) {
+    delete dict;
+    dict = NULL;
+  }
+  return true;
+}
+
 }  // namespace history_logic
 

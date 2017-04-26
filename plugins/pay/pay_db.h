@@ -24,6 +24,8 @@ class PayDB {
   bool OnCreateRechargeOrder(const int64 uid, const int64 rid, const double price,
                              const int32 rtype);
 
+  bool OnCreateWithdrawOrder(const int64 uid, const int64 rid,
+                                  const double price, const int64 bid); 
   bool OnUpdateRechargeOrder(const int64 uid, const int64 rid, const int32 status,
                              const int32 rtype);
 

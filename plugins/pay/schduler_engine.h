@@ -6,6 +6,7 @@
 
 #include "logic/swp_infos.h"
 #include "manager/data_share_mgr.h"
+#include "pay/pay_proto_buf.h"
 #include "pay/pay_db.h"
 #include "pay/wx_order.h"
 #include "pay/third_order.h"
@@ -33,7 +34,7 @@ class PayManager {
 
   bool OnThirdCreateCashOrder(const int socket, const int64 session,
                        const int32 reversed, const int64 uid,
-                       const double price,const std::string& rec_bank_name, const std::string& rec_bra_bank_name, 
+                       const double price,const int64 bid,const std::string& rec_bank_name, const std::string& rec_bra_bank_name, 
 		       const std::string &rec_card_no, const std::string &rec_account_name);
   bool OnThirdCreateOrder(const int socket, const int64 session,
                        const int32 reversed, const int64 uid,
@@ -44,6 +45,10 @@ class PayManager {
                   const int64 uid, const int64 rid, const int32 pay_result);
 
   bool OnWXServer(const int socket, const std::string& appid, const std::string& mch_id,
+                  const int64 total_fee, const int64 rid,
+                  const int64 result, const std::string& transaction_id);
+
+  bool OnThirdServer(const int socket, const std::string& appid, const std::string& mch_id,
                   const int64 total_fee, const int64 rid,
                   const int64 result, const std::string& transaction_id);
 
@@ -60,10 +65,10 @@ class PayManager {
                pay_logic::ThirdOrder& third_order);
   bool ThirdCashOrder(const int socket, const int64 rid,
                const double price,const std::string& rec_bank_name, const std::string& rec_bra_bank_name, const std::string &rec_card_no, const std::string &rec_account_name,
-               pay_logic::ThirdOrder& third_order);
+               pay_logic::ThirdOrder& third_order, pay_logic::net_reply::ThirdCashOrder &r_third_cash_order);
 
   bool ParserThirdOrderResult(std::string& result, std::string& prepay_id);
-  bool ParserThirdCashOrderResult(std::string& result, std::string& prepay_id);
+  bool ParserThirdCashOrderResult(std::string& result, pay_logic::net_reply::ThirdCashOrder &r_third_cash_order);
  private:
   pay_logic::PayDB* pay_db_;
   PayCache *pay_cache_;

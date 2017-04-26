@@ -126,6 +126,10 @@ try
       OnThirdCashOrder(srv, socket, packet);
       break;
     }
+    case R_THIRD_CASH_SVC: {
+      OnThirdCashServer(srv, socket, packet);
+      break;
+    }
     default:
 	  LOG_ERROR2("default_____________________[%d]", packet->operate_code); //tw test
       break;
@@ -287,7 +291,7 @@ bool Paylogic::OnThirdCashOrder(struct server* srv, int socket,
 
   pay_logic::PayEngine::GetSchdulerManager()->OnThirdCreateCashOrder(
       socket, packet->session_id, packet->reserved, third_cash_order.uid(),
-      third_cash_order.amount(),third_cash_order.rec_bank_name(),
+      third_cash_order.amount(),third_cash_order.bid(),third_cash_order.rec_bank_name(),
       third_cash_order.rec_branch_bank_name(),third_cash_order.rec_card_no(), third_cash_order.rec_account_name());
 
 
@@ -319,13 +323,19 @@ bool Paylogic::OnThirdPayClient(struct server* srv, int socket,
 
 bool Paylogic::OnThirdPaySever(struct server* srv, int socket,
                             struct PacketHead * packet) {
-  pay_logic::net_request::WXPayServer wx_pay_sever;
+
+  LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
+  LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
+  LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
+  LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
+  LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
+  pay_logic::net_request::ThirdPayServer third_pay_sever;
   if (packet->packet_length <= PACKET_HEAD_LENGTH) {
     send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
     return false;
   }
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
-  bool r = wx_pay_sever.set_http_packet(packet_control->body_);
+  bool r = third_pay_sever.set_http_packet(packet_control->body_);
   if (!r) {
     LOG_DEBUG2("packet_length %d",packet->packet_length);
     const std::string r_rt = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
@@ -333,12 +343,42 @@ bool Paylogic::OnThirdPaySever(struct server* srv, int socket,
     return false;
   }
 
-  pay_logic::PayEngine::GetSchdulerManager()->OnWXServer(
-      socket, wx_pay_sever.appid(), wx_pay_sever.mch_id(),
-      wx_pay_sever.total_fee(), wx_pay_sever.recharge_id(),
-      wx_pay_sever.pay_result(), wx_pay_sever.transaction_id());
+  pay_logic::PayEngine::GetSchdulerManager()->OnThirdServer(
+      socket, third_pay_sever.pay_type(), third_pay_sever.mch_id(),
+      third_pay_sever.amount(), 0,
+      0, third_pay_sever.trade_no());
+
   return true;
 }
 
 
+bool Paylogic::OnThirdCashServer(struct server* srv, int socket,
+                            struct PacketHead * packet) {
+
+  LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
+  LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
+  LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
+  LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
+  LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
+  pay_logic::net_request::ThirdPayServer third_pay_sever;
+  if (packet->packet_length <= PACKET_HEAD_LENGTH) {
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
+    return false;
+  }
+  struct PacketControl* packet_control = (struct PacketControl*) (packet);
+  bool r = third_pay_sever.set_http_packet(packet_control->body_);
+  if (!r) {
+    LOG_DEBUG2("packet_length %d",packet->packet_length);
+    const std::string r_rt = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+    send_full(socket, r_rt.c_str(), r_rt.length());
+    return false;
+  }
+
+  pay_logic::PayEngine::GetSchdulerManager()->OnThirdServer(
+      socket, third_pay_sever.pay_type(), third_pay_sever.mch_id(),
+      third_pay_sever.amount(), 0,
+      0, third_pay_sever.trade_no());
+
+  return true;
+}
 }  // namespace trades_logic

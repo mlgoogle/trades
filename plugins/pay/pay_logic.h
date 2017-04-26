@@ -66,6 +66,8 @@ class Paylogic {
 
   bool OnThirdPaySever(struct server* srv, int socket,
                     struct PacketHead * packet);
+  bool OnThirdCashServer(struct server* srv, int socket,
+                    struct PacketHead * packet);
  private:
   bool Init();
  private:

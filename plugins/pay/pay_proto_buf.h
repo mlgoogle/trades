@@ -305,81 +305,93 @@ class WXPayOrder {
 class ThirdPayServer {
  public:
   ThirdPayServer()
-      : appid_(NULL),
+      : trade_no_(NULL),
         mch_id_(NULL),
-        total_fee_(NULL),
-        recharge_id_(NULL),
-        pay_result_(NULL),
-        transaction_id_(NULL),
-        time_end_(NULL) {
+        out_trade_no_(NULL),
+        out_context_(NULL),
+        pay_type_(NULL),
+        currency_(NULL),
+        status_(NULL),
+        settle_type_(NULL),
+        amount_(NULL),
+        payed_amount_(NULL) {
   }
 
   ~ThirdPayServer() {
-    if (appid_) {
-      delete appid_;
-      appid_ = NULL;
-    }
     if (mch_id_) {
       delete mch_id_;
       mch_id_ = NULL;
     }
-    if (total_fee_) {
-      delete total_fee_;
-      total_fee_ = NULL;
+    if (trade_no_) {
+      delete trade_no_;
+      trade_no_ = NULL;
+    } 
+    if (out_trade_no_) {
+      delete out_trade_no_;
+      out_trade_no_ = NULL;
     }
-    if (recharge_id_) {
-      delete recharge_id_;
-      recharge_id_ = NULL;
+    if (out_context_) {
+      delete out_context_;
+      out_context_ = NULL;
+    } 
+    if (pay_type_) {
+      delete pay_type_;
+      pay_type_ = NULL;
+    } 
+    if (currency_) {
+      delete currency_;
+      currency_ = NULL;
     }
-    if (pay_result_) {
-      delete pay_result_;
-      pay_result_ = NULL;
+    if (amount_) {
+      delete amount_;
+      amount_ = NULL;
+    }    
+    if (payed_amount_) {
+      delete payed_amount_;
+      payed_amount_ = NULL;
+    } 
+    if (status_) {
+      delete status_;
+      status_ = NULL;
     }
-    if (transaction_id_) {
-      delete transaction_id_;
-      transaction_id_ = NULL;
-    }
-    if (time_end_) {
-      delete time_end_;
-      time_end_ = NULL;
-    }
+    if (settle_type_) {
+      delete settle_type_;
+      settle_type_ = NULL;
+    } 
   }
 
   bool set_http_packet(base_logic::DictionaryValue* value);
 
-  void set_appid(std::string appid) {
-    appid_ = new base_logic::StringValue(appid);
-  }
-
-  void set_mch_id(std::string mch_id) {
-    mch_id_ = new base_logic::StringValue(mch_id);
-  }
-
-  void set_total_fee(int64 total_fee) {
-    total_fee_ = new base_logic::FundamentalValue(total_fee);
-  }
-
-  void set_recharge_id(int64 recharge_id) {
-    recharge_id_ = new base_logic::FundamentalValue(recharge_id);
-  }
-
-  void set_pay_result(int64 pay_result) {
-    pay_result_ = new base_logic::FundamentalValue(pay_result);
-  }
-
-  void set_transaction_id(std::string transaction_id) {
-    transaction_id_ = new base_logic::StringValue(transaction_id);
-  }
-
-  void set_time_end(std::string& time_end) {
-    time_end_ = new base_logic::StringValue(time_end);
-  }
-
-  std::string appid() {
-    std::string appid;
-    if (appid_)
-      appid_->GetAsString(&appid);
-    return appid;
+  void set_trade_no(std::string trade_no) {                         
+    trade_no_ = new base_logic::StringValue(trade_no);              
+  }                                                           
+  void set_mch_id(std::string mch_id) {                         
+    mch_id_ = new base_logic::StringValue(mch_id);              
+  }                                                           
+  void set_out_trade_no(std::string out_trade_no) {                         
+    out_trade_no_ = new base_logic::StringValue(out_trade_no);              
+  }                                                           
+  void set_out_context(std::string out_context) {                         
+    out_context_ = new base_logic::StringValue(out_context);              
+  }                                                           
+  void set_pay_type(std::string pay_type) {                         
+    pay_type_ = new base_logic::StringValue(pay_type);              
+  }                                                           
+  void set_currency(std::string currency) {                         
+    currency_ = new base_logic::StringValue(currency);              
+  }                                                           
+  void set_status(std::string status) {                         
+    status_ = new base_logic::StringValue(status);              
+  }                                                           
+  void set_settle_type(std::string settle_type) {                         
+    settle_type_ = new base_logic::StringValue(settle_type);              
+  }                                                           
+                                                              
+  void set_amount(int64 amount) {                       
+    amount_ = new base_logic::FundamentalValue(amount); 
+  }  
+  void set_payed_amount(int64 payed_amount) {                       
+    payed_amount_ = new base_logic::FundamentalValue(payed_amount); 
   }
 
   std::string mch_id() {
@@ -389,106 +401,76 @@ class ThirdPayServer {
     return mch_id;
   }
 
-  std::string transaction_id() const {
-    std::string transaction_id;
-    if (transaction_id_)
-      transaction_id_->GetAsString(&transaction_id);
-    return transaction_id;
-  }
+  std::string trade_no() {            
+    std::string temp;             
+    if (trade_no_)                    
+      trade_no_->GetAsString(&temp);
+    return temp;                  
+  }                                  
+  std::string out_trade_no() {            
+    std::string temp;             
+    if (out_trade_no_)                    
+      out_trade_no_->GetAsString(&temp);
+    return temp;                  
+  }                                  
+  std::string out_context() {            
+    std::string temp;             
+    if (out_context_)                    
+      out_context_->GetAsString(&temp);
+    return temp;                  
+  }                                  
+  std::string pay_type() {            
+    std::string temp;             
+    if (pay_type_)                    
+      pay_type_->GetAsString(&temp);
+    return temp;                  
+  }                                  
+  std::string currency() {            
+    std::string temp;             
+    if (currency_)                    
+      currency_->GetAsString(&temp);
+    return temp;                  
+  }                                  
+  std::string status() {            
+    std::string temp;             
+    if (status_)                    
+      status_->GetAsString(&temp);
+    return temp;                  
+  }                                  
+  std::string settle_type() {            
+    std::string temp;             
+    if (settle_type_)                    
+      settle_type_->GetAsString(&temp);
+    return temp;                  
+  }                                  
 
-  int64 total_fee() {
-    int64 total_fee;
-    if (total_fee_)
-      total_fee_->GetAsBigInteger(&total_fee);
-    return total_fee;
-  }
-
-  int64 recharge_id() {
-    int64 recharge_id;
-    if (recharge_id_)
-      recharge_id_->GetAsBigInteger(&recharge_id);
-    return recharge_id;
-  }
-
-  int64 pay_result() {
-    int64 pay_result;
-    if (pay_result_)
-      pay_result_->GetAsBigInteger(&pay_result);
-    return pay_result;
-  }
-
- private:
-  base_logic::StringValue* appid_;
-  base_logic::StringValue* mch_id_;
-  base_logic::FundamentalValue* total_fee_;
-  base_logic::FundamentalValue* recharge_id_;
-  base_logic::FundamentalValue* pay_result_;  //1 - 支付成功
-  base_logic::StringValue* transaction_id_;
-  base_logic::StringValue* time_end_;
-};
-
-class ThirdPayClient {
- public:
-  ThirdPayClient()
-      : uid_(NULL),
-        rid_(NULL),
-        pay_result_(NULL) {
-  }
-
-  ~ThirdPayClient() {
-    if (uid_) {
-      delete uid_;
-      uid_ = NULL;
-    }
-
-    if (rid_) {
-      delete rid_;
-      rid_ = NULL;
-    }
-
-    if (pay_result_) {
-      delete pay_result_;
-      pay_result_ = NULL;
-    }
-  }
-
-  bool set_http_packet(base_logic::DictionaryValue* value);
-
-  void set_uid(const int64 uid) {
-    uid_ = new base_logic::FundamentalValue(uid);
-  }
-
-  void set_rid(const int64 rid) {
-    rid_ = new base_logic::FundamentalValue(rid);
-  }
-
-  void set_pay_result(const int32 pay_result) {
-    pay_result_ = new base_logic::FundamentalValue(pay_result);
-  }
-
-  const int32 uid() const {
-    int64 uid = 0;
-    uid_->GetAsBigInteger(&uid);
-    return uid;
-  }
-
-  const int64 rid() const {
-    int64 rid = 0;
-    rid_->GetAsBigInteger(&rid);
-    return rid;
-  }
-
-  const int32 pay_result() const {
-    int32 pay_result = 0;
-    pay_result_->GetAsInteger(&pay_result);
-    return pay_result;
+  int64 amount() {                         
+    int64 temp;                          
+    if (amount_)                           
+      amount_->GetAsBigInteger(&temp);
+    return temp;                         
+  }                                           
+  int64 payed_amount() {                         
+    int64 temp;                          
+    if (payed_amount_)                           
+      payed_amount_->GetAsBigInteger(&temp);
+    return temp;                         
   }
 
  private:
-  base_logic::FundamentalValue* uid_;
-  base_logic::FundamentalValue* rid_;
-  base_logic::FundamentalValue* pay_result_;
+  base_logic::StringValue* mch_id_; 	//商户号
+  base_logic::StringValue* trade_no_;	//平台交易号
+  base_logic::StringValue* out_trade_no_;	//商户交易号
+  base_logic::StringValue* out_context_;	//创建交易时的outContext参数
+  base_logic::StringValue* pay_type_;	//支付方式
+  base_logic::StringValue* currency_;	//
+  base_logic::FundamentalValue* amount_;		//交易金额(分)
+  base_logic::FundamentalValue* payed_amount_;		//用户支付金额 payed_amount_ == amount_
+
+  base_logic::StringValue* status_;			//
+  base_logic::StringValue* settle_type_;			//结算类型，SELF: 结算到当前商户账户，OTHER: 结算到指定的银行账户，默认值为SELF
 };
+
 
 class ThirdPayOrder {
  public:
@@ -655,6 +637,10 @@ class ThirdCashOrder {
       delete rec_bank_name_;
       rec_bank_name_= NULL;
     }
+    if (bid_) {
+      delete bid_;
+      bid_ = NULL;
+    }
     if (amount_) {
       delete amount_;
       amount_= NULL;
@@ -675,6 +661,9 @@ class ThirdCashOrder {
 
   bool set_http_packet(base_logic::DictionaryValue* value);
 
+  void set_bid(int64 bid) {
+    bid_ = new base_logic::FundamentalValue(bid);
+  }
   void set_uid(int64 uid) {
     uid_ = new base_logic::FundamentalValue(uid);
   }
@@ -705,6 +694,12 @@ class ThirdCashOrder {
     if (uid_)
       uid_->GetAsBigInteger(&uid);
     return uid;
+  }
+  int64 bid() {
+    int64 bid;
+    if (bid_)
+      bid_->GetAsBigInteger(&bid);
+    return bid;
   }
   const std::string rec_bank_name() {
     std::string rec_bank_name;
@@ -752,10 +747,75 @@ class ThirdCashOrder {
 //  base_logic::StringValue* content_;//
 
   base_logic::FundamentalValue* amount_;  // 订单总价  单位 分
+  base_logic::FundamentalValue* bid_;  // 
   base_logic::StringValue* rec_bank_name_;//recivebankname
   base_logic::StringValue* rec_branch_bank_name_;//
   base_logic::StringValue* rec_card_no_;//
   base_logic::StringValue* rec_account_name_;//收款人开户名称
+};
+
+
+class ThirdCashServer{
+ public:
+  ThirdCashServer()
+      : uid_(NULL),
+        rid_(NULL),
+        pay_result_(NULL) {
+  }
+
+  ~ThirdCashServer() {
+    if (uid_) {
+      delete uid_;
+      uid_ = NULL;
+    }
+
+    if (rid_) {
+      delete rid_;
+      rid_ = NULL;
+    }
+
+    if (pay_result_) {
+      delete pay_result_;
+      pay_result_ = NULL;
+    }
+  }
+
+  bool set_http_packet(base_logic::DictionaryValue* value);
+
+  void set_uid(const int64 uid) {
+    uid_ = new base_logic::FundamentalValue(uid);
+  }
+
+  void set_rid(const int64 rid) {
+    rid_ = new base_logic::FundamentalValue(rid);
+  }
+
+  void set_pay_result(const int32 pay_result) {
+    pay_result_ = new base_logic::FundamentalValue(pay_result);
+  }
+
+  const int32 uid() const {
+    int64 uid = 0;
+    uid_->GetAsBigInteger(&uid);
+    return uid;
+  }
+
+  const int64 rid() const {
+    int64 rid = 0;
+    rid_->GetAsBigInteger(&rid);
+    return rid;
+  }
+
+  const int32 pay_result() const {
+    int32 pay_result = 0;
+    pay_result_->GetAsInteger(&pay_result);
+    return pay_result;
+  }
+
+ private:
+  base_logic::FundamentalValue* uid_;
+  base_logic::FundamentalValue* rid_;
+  base_logic::FundamentalValue* pay_result_;
 };
 
 //end Third
@@ -965,14 +1025,14 @@ class ThirdCashOrder {
     out_pay_no_ = new base_logic::StringValue(out_pay_no);
   }
 
-  void set_amount(const std::string& amount) {
-    amount_ = new base_logic::StringValue(amount);
+  void set_amount(double amount) {
+    amount_ = new base_logic::FundamentalValue(amount);
   }
-  void set_transfer_amount(const std::string& transfer_amount) {
-    transfer_amount_ = new base_logic::StringValue(transfer_amount);
+  void set_transfer_amount(double transfer_amount) {
+    transfer_amount_ = new base_logic::FundamentalValue(transfer_amount);
   }
-  void set_fee(const std::string& fee) {
-    fee_= new base_logic::StringValue(fee);
+  void set_fee(double fee) {
+    fee_= new base_logic::FundamentalValue(fee);
   }
   void set_pay_no(const std::string& pay_no) {
     pay_no_ = new base_logic::StringValue(pay_no);
@@ -1003,9 +1063,9 @@ class ThirdCashOrder {
  private:
   base_logic::StringValue* merchant_no_;
   base_logic::StringValue* out_pay_no_;
-  base_logic::StringValue*  amount_;
-  base_logic::StringValue* transfer_amount_;
-  base_logic::StringValue* fee_;
+  base_logic::FundamentalValue*  amount_;
+  base_logic::FundamentalValue* transfer_amount_;
+  base_logic::FundamentalValue* fee_;
   base_logic::StringValue* pay_no_;
   base_logic::StringValue* status_;
 

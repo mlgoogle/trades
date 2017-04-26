@@ -11,7 +11,7 @@
 
 namespace pay_logic {
 
-const std::string PASSWORD = "password";
+const std::string PASSWORD = "hsx888";
 ThirdOrder::ThirdOrder() {
   total_fee = 0;
   fee = 0;
@@ -20,6 +20,47 @@ ThirdOrder::ThirdOrder() {
 
 ThirdOrder::~ThirdOrder() {
 }
+
+std::string UrlDecode(const std::string& szToDecode)  
+{  
+  std::string result;  
+  int hex = 0;  
+  for (size_t i = 0; i < szToDecode.length(); ++i)  
+  {   
+    switch (szToDecode[i])  
+    {   
+      case '+':  
+        result += ' ';  
+        break;  
+      case '%':  
+        if (isxdigit(szToDecode[i + 1]) && isxdigit(szToDecode[i + 2]))  
+        {   
+          std::string hexStr = szToDecode.substr(i + 1, 2);  
+          hex = strtol(hexStr.c_str(), 0, 16);//字母和数字[0-9a-zA-Z]、一些特殊符号[$-_.+!*'(),] 、以及某些保留字[$&+,/:;=?@] //可以不经过编码直接用于URL  
+          if (!((hex >= 48 && hex <= 57) || //0-9  
+	  (hex >=97 && hex <= 122) ||   //a-z  
+	  (hex >=65 && hex <= 90) ||    //A-Z       //一些特殊符号及保留字[$-_.+!*'(),]  [$&+,/:;=?@]  
+	  hex == 0x21 || hex == 0x24 || hex == 0x26 || hex == 0x27 || hex == 0x28 || hex == 0x29 
+	  || hex == 0x2a || hex == 0x2b|| hex == 0x2c || hex == 0x2d || hex == 0x2e || hex == 0x2f 
+	  || hex == 0x3A || hex == 0x3B|| hex == 0x3D || hex == 0x3f || hex == 0x40 || hex == 0x5f 
+	  ))  
+	  {   
+            result += char(hex);
+            i += 2;  
+          }   
+          else result += '%';  
+        }
+	else 
+          result += '%';  
+        break;  
+      default:  
+        result += szToDecode[i];  
+        break;  
+    }   
+  }   
+  return result;
+}   
+
 
 void ThirdOrder::InitWxVerify(const std::string& id, 
                            const std::string& p_type, 
@@ -40,6 +81,7 @@ void ThirdOrder::InitWxVerify(const std::string& id) {
   mch_id = T_MCH_ID;
   notify_url = T_CASH_NOTIFY_URL;
 }
+/*
 void ThirdOrder::InitWxVerify() {
   appid = T_APPID;
   mch_id = T_MCH_ID;
@@ -50,6 +92,7 @@ void ThirdOrder::InitWxVerify() {
   nonce_str = logic::SomeUtils::RandomString(32);
   //out_trade_no += logic::SomeUtils::RandomString(6);
 }
+*/
 static std::string Upper(std::string &text) {
   for (unsigned int i = 0; i < text.length(); i ++)
   {
@@ -144,14 +187,35 @@ void ThirdOrder::Set_Headers(http::HttpMethodPost &hmp)
 
 std::string ThirdOrder::CashPlaceOrder(const std::string& id) {
   InitWxVerify(id);
-  std::string body = PostFiled();
+  std::string body = PostFiled(true);
   PlaceOrderSign(body ,true);
 
   std::string url = THIRD_CASH_URL + "com.opentech.cloud.easypay.balance.pay/0.0.1";
   http::HttpMethodPost hmp(url);
   Set_Headers(hmp);
-///
+///-------------
   hmp.Post(body.c_str());
+
+////get header message
+  std::string err_key = "x-oapi-error-code";
+  MIG_VALUE err_value, mes_value;
+  
+  hmp.GetHeader(err_key, err_value);
+  MIG_VALUE::iterator iter,msg_iter;
+  for (iter = err_value.begin(); iter != err_value.end(); iter++)
+    LOG_DEBUG2("err_value_____[%s]", iter->c_str());
+  std::string msg_key = "x-oapi-msg";
+  hmp.GetHeader(msg_key, mes_value);
+
+  for (msg_iter = mes_value.begin(); msg_iter != mes_value.end(); msg_iter ++)
+  {
+    LOG_DEBUG2("msg_value_____[%s]", msg_iter->c_str());
+    LOG_DEBUG2("msg_value_____[%s]", UrlDecode((*msg_iter)).c_str());
+
+  }
+/////
+//
+//----------------
   std::string result;
   hmp.GetContent(result);
   //LOG(INFO)<< "http post result:" << result;

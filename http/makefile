@@ -136,12 +136,19 @@ PAYNAME = pay_
 PAYPROC_PATH = /pay
 PAY_OBJECT_PATH = ./obj$(NEWSPROC_PATH)
 OTJERPROC_VERSION = /v1
-payproc:$(PAYPROC_PATH)/wx_callback.fcgi $(PAYPROC_PATH)/wx_order.fcgi
+payproc:$(PAYPROC_PATH)/wx_callback.fcgi $(PAYPROC_PATH)/wx_order.fcgi $(PAYPROC_PATH)/third_callback.fcgi $(PAYPROC_PATH)/third_cash_callback.fcgi
 $(PAYPROC_PATH)/wx_callback.fcgi: $(PAY_OBJECT_PATH)/$(PAYNAME)wx_callback.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(PAYPROC_PATH)$(OTJERPROC_VERSION)/wx_callback.fcgi
 
 $(PAYPROC_PATH)/wx_order.fcgi: $(PAY_OBJECT_PATH)/$(PAYNAME)wx_order.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(PAYPROC_PATH)$(OTJERPROC_VERSION)/wx_order.fcgi
+##---add by tw
+$(PAYPROC_PATH)/third_callback.fcgi: $(PAY_OBJECT_PATH)/$(PAYNAME)third_callback.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(PAYPROC_PATH)$(OTJERPROC_VERSION)/third_callback.fcgi
+
+$(PAYPROC_PATH)/third_cash_callback.fcgi: $(PAY_OBJECT_PATH)/$(PAYNAME)third_cash_callback.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(PAYPROC_PATH)$(OTJERPROC_VERSION)/third_cash_callback.fcgi
+##---end add bytw
 ### 编译
 $(PAY_OBJECT_PATH)/$(PAYNAME)wx_callback.o:
 	$(COMPILE) .$(PAYPROC_PATH)$(OTJERPROC_VERSION)/wx_callback/wx_callback.cc
@@ -149,6 +156,11 @@ $(PAY_OBJECT_PATH)/$(PAYNAME)wx_callback.o:
 $(PAY_OBJECT_PATH)/$(PAYNAME)wx_order.o:
 	$(COMPILE) .$(PAYPROC_PATH)$(OTJERPROC_VERSION)/wx_order/wx_order.cc
 
+$(PAY_OBJECT_PATH)/$(PAYNAME)third_callback.o:
+	$(COMPILE) .$(PAYPROC_PATH)$(OTJERPROC_VERSION)/third_callback/third_callback.cc
+
+$(PAY_OBJECT_PATH)/$(PAYNAME)third_cash_callback.o:
+	$(COMPILE) .$(PAYPROC_PATH)$(OTJERPROC_VERSION)/third_cash_callback/third_cash_callback.cc
 ######################accountproc###############################################
 ACCOUNTNAME = account_
 ACCOUNTPROC_PATH = /account

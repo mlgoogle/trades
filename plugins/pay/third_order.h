@@ -99,7 +99,7 @@ class ThirdOrder {
 */
  private:
   std::string PostFiled(bool iscash=false);
-  void InitWxVerify();
+  //void InitWxVerify();
   void InitWxVerify(const std::string& id);
   void InitWxVerify(const std::string& id, 
                     const std::string& pay_type,

@@ -250,6 +250,11 @@ bool ThirdCashOrder::set_http_packet(base_logic::DictionaryValue* value) {
   else
     return false;
 
+  r = value->GetBigInteger(L"bid", &uid);
+  if (r)
+    set_bid(uid);
+  else
+    return false;
   r = value->GetReal(L"amount", &amount);
   if (r)
     set_amount(amount);
@@ -283,6 +288,91 @@ bool ThirdCashOrder::set_http_packet(base_logic::DictionaryValue* value) {
   if (r)
     set_rec_account_name(temp);
 
+  return true;
+}
+
+
+bool ThirdPayServer::set_http_packet(base_logic::DictionaryValue* value) {
+  LOG_DEBUG2("ThirdPayServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("ThirdPayServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("ThirdPayServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("ThirdPayServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("ThirdPayServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("ThirdPayServer_____set_http_packet___________%s", "test");
+  int32 err = 0;
+  bool r = false;
+  std::string tmp;
+
+  if (value == NULL)
+    return false;
+//
+  r = value->GetString(L"merchantNo", &tmp);
+  if (r)
+    set_mch_id(tmp);
+  else
+    return false;
+   r = value->GetString(L"tradeNo", &tmp);
+   if (r)
+     set_trade_no(tmp);
+   else
+     return false;
+   r = value->GetString(L"outTradeNo", &tmp);
+   if (r)
+     set_out_trade_no(tmp);
+   else
+     return false;
+   r = value->GetString(L"outContext", &tmp);
+   if (r)
+     set_out_context(tmp);
+   else
+     return false;
+   r = value->GetString(L"payType", &tmp);
+   if (r)
+     set_pay_type(tmp);
+   else
+     return false;
+   r = value->GetString(L"currency", &tmp);
+   if (r)
+     set_currency(tmp);
+   else
+     return false;
+   r = value->GetString(L"status", &tmp);
+   if (r)
+     set_status(tmp);
+   else
+     return false;     
+   r = value->GetString(L"settleType", &tmp);
+   if (r)
+     set_settle_type(tmp);
+   else
+     return false;
+/*
+  base_logic::ValueSerializer* deserializer =
+      base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &xml_str);
+  base_logic::DictionaryValue* json_value =
+      (base_logic::DictionaryValue*) deserializer->Deserialize(&err, &err_str);
+*/
+
+/*
+  r = xml_value->GetString(L"return_code", &return_code);
+  if (!r)
+    return false;
+  if (return_code.find("SUCCESS") == std::string::npos)
+    return false;
+*/
+  r = value->GetString(L"amount", &tmp);
+  if (r && tmp.length()>0)
+    set_amount(atoll(tmp.c_str()));
+  else
+    return false;
+
+  r = value->GetString(L"payedAmount", &tmp);
+  if (r && tmp.length()>0)
+    set_payed_amount(atoll(tmp.c_str()));
+  else
+    return false;
+
+  //LOG_DEBUG2("%s",xml_str.c_str());
   return true;
 }
 }
