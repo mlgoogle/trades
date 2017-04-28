@@ -52,7 +52,7 @@ bool PayDB::OnUpdateCallBackRechargeOrder(const int64 rid, const double price,
   base_logic::DictionaryValue *info_value = NULL;
   std::string sql;
   int64 bigr_type = 0;
-  if (astatus == 1)
+  if (astatus == 1) //成功
     bigr_type = 3;
   else
     bigr_type = 4;
@@ -169,7 +169,6 @@ bool PayDB::OnUpdateCallBackWithdrawOrder(const std::string& rid, const double p
   else
     bigr_type = 4;
 */
-  //`proc_UpdateCallBackRechargeOrder`(in i_rid bigint,in i_price double,in i_status int,in i_transaction_id varchar(128))
   sql = "call proc_UpdateCallBackWithdraw("
       + rid + ","
       + base::BasicUtil::StringUtil::DoubleToString(price) + ","

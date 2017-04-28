@@ -301,10 +301,10 @@ class WXPayOrder {
   base_logic::StringValue* open_id_;//微信公众号支付必填
 };
 
-//Third
-class ThirdPayServer {
+//SHFJ
+class SHFJPayServer {
  public:
-  ThirdPayServer()
+  SHFJPayServer()
       : trade_no_(NULL),
         mch_id_(NULL),
         out_trade_no_(NULL),
@@ -317,7 +317,7 @@ class ThirdPayServer {
         payed_amount_(NULL) {
   }
 
-  ~ThirdPayServer() {
+  ~SHFJPayServer() {
     if (mch_id_) {
       delete mch_id_;
       mch_id_ = NULL;
@@ -472,20 +472,22 @@ class ThirdPayServer {
 };
 
 
-class ThirdPayOrder {
+class SHFJPayOrder {
  public:
-  ThirdPayOrder()
+  SHFJPayOrder()
       : uid_(NULL),
 	merchant_no_(NULL),
 	amount_(NULL),
 	out_trade_no_(NULL),
 	currency_(NULL),
 	content_(NULL),
+	wechat_openid_(NULL),
+	wechat_appid_(NULL),
 	pay_type_(NULL)
 	{
   }
 
-  ~ThirdPayOrder() {
+  ~SHFJPayOrder() {
     if (uid_) {
       delete uid_;
       uid_ = NULL;
@@ -547,6 +549,12 @@ class ThirdPayOrder {
   void set_content(const std::string& content) {
     content_ = new base_logic::StringValue(content);
   }
+  void set_wechat_appid(const std::string& wechat_appid) {
+    wechat_appid_= new base_logic::StringValue(wechat_appid);
+  }
+  void set_wechat_openid(const std::string& wechat_openid) {
+    wechat_openid_ = new base_logic::StringValue(wechat_openid);
+  }
 
   int64 uid() {
     int64 uid;
@@ -593,6 +601,18 @@ class ThirdPayOrder {
     return content;
   }
 
+  const std::string wechat_openid() {
+    std::string tmp;
+    if (wechat_openid_)
+      wechat_openid_->GetAsString(&tmp);
+    return tmp;
+  }
+  const std::string wechat_appid() {
+    std::string tmp;
+    if (wechat_appid_)
+      wechat_appid_->GetAsString(&tmp);
+    return tmp;
+  }
  private:
   base_logic::FundamentalValue* uid_;
 
@@ -602,12 +622,14 @@ class ThirdPayOrder {
   base_logic::StringValue* currency_;//no used
   base_logic::StringValue* content_;//
   base_logic::StringValue* pay_type_;//
+  base_logic::StringValue* wechat_openid_;//
+  base_logic::StringValue* wechat_appid_;//
 };
 
 
-class ThirdCashOrder {
+class SHFJCashOrder {
  public:
-  ThirdCashOrder()
+  SHFJCashOrder()
       : uid_(NULL),
 	rec_bank_name_(NULL),
 	amount_(NULL),
@@ -618,7 +640,7 @@ class ThirdCashOrder {
 	{
   }
 
-  ~ThirdCashOrder() {
+  ~SHFJCashOrder() {
     if (uid_) {
       delete uid_;
       uid_ = NULL;
@@ -751,9 +773,9 @@ class ThirdCashOrder {
 };
 
 
-class ThirdCashServer{
+class SHFJCashServer{
  public:
-  ThirdCashServer()
+  SHFJCashServer()
       : mch_id_(NULL),
         pay_no_(NULL),
         out_pay_no_(NULL),
@@ -765,7 +787,7 @@ class ThirdCashServer{
         fee_(NULL) {
   }
 
-  ~ThirdCashServer() {
+  ~SHFJCashServer() {
     if (mch_id_) {        
       delete mch_id_;     
       mch_id_ = NULL;     
@@ -900,7 +922,7 @@ class ThirdCashServer{
   base_logic::FundamentalValue* fee_; //
 };
 
-//end Third
+//end SHFJ
 
 }
 
@@ -1023,13 +1045,13 @@ class Balance {
 };
 
 
-class ThirdPayOrder {
+class SHFJPayOrder {
  public:
-  ThirdPayOrder()
+  SHFJPayOrder()
       : payment_info_(NULL) {
   }
 
-  ~ThirdPayOrder() {
+  ~SHFJPayOrder() {
     if (payment_info_) {
       delete payment_info_;
       payment_info_= NULL;
@@ -1056,9 +1078,9 @@ class ThirdPayOrder {
 
 
 
-class ThirdCashOrder {
+class SHFJCashOrder {
  public:
-  ThirdCashOrder()
+  SHFJCashOrder()
       : merchant_no_(NULL),
         out_pay_no_(NULL),
         amount_(NULL),
@@ -1069,7 +1091,7 @@ class ThirdCashOrder {
       {
   }
 
-  ~ThirdCashOrder() {
+  ~SHFJCashOrder() {
     if (merchant_no_) {
       delete merchant_no_;
       merchant_no_= NULL;

@@ -1,29 +1,20 @@
 //  Copyright (c) 2017-2018 The SWP Authors. All rights reserved.
 //  Created on: 2017年1月12日 Author: kerry
 
-#ifndef PUB_PAY_THIRD_ORDER_H_
-#define PUB_PAY_THIRD_ORDER_H_
+#ifndef PUB_PAY_SHFJ_ORDER_H_
+#define PUB_PAY_SHFJ_ORDER_H_
 
 #include <string>
 #include "logic/base_values.h"
 #include "http/http_method.h"
 
-
-const std::string T_APPID = "th9dc39aec13ee3158";
 const std::string T_MCH_ID = "MNYH54001EBOM"; //商户号
-
-//const std::string T_MPID = "the9f0932fb23e8f8a";
-
 const std::string T_APP_KEY = "2017042116284843001"; //证书编号
 const std::string T_MD5_KEY = "RPOUDPWHNMJETKCJADHFYQBEMJRVDVHP"; //证书编号
 
-const std::string T_APP_TRADE_TYPE = "APP";
-
-//const std::string THIRD_URL = "https://gw.uqiantu.net/native/";
-//const std::string THIRD_CASH_URL = "https://gw.uqiantu.net/native/";
 const std::string THIRD_URL = "http://119.23.114.137/native/";
 const std::string THIRD_CASH_URL = "http://119.23.114.137/native/";
-const std::string THIRD_PACKAGE = "Sign=ThirdPay";
+
 const std::string T_NOTIFY_URL =
     "http://139.224.34.22/cgi-bin/flight/pay/v1/third_callback.fcgi";
 const std::string T_CASH_NOTIFY_URL =
@@ -33,10 +24,10 @@ const std::string T_CASH_NOTIFY_URL =
  */
 namespace pay_logic {
 
-class ThirdOrder {
+class SHFJOrder {
  public:
-  ThirdOrder();
-  virtual ~ThirdOrder();
+  SHFJOrder();
+  virtual ~SHFJOrder();
 
   //inline void set_body(std::string b) {
   //  body = b;
@@ -68,10 +59,17 @@ class ThirdOrder {
   inline void set_prepayid(std::string preid) {
     prepayid = preid;
   }
+  inline void set_wechat_appid(const std::string& value){
+    wechat_appid = value;
+  }
+  inline void set_wechat_openid(const std::string& value) {
+    wechat_openid = value;
+  }
   //void PreSign();
   //void PreSerialize(base_logic::DictionaryValue* dic);
   //std::string PlaceOrder();
-  std::string PlaceOrder(const std::string& id, const std::string& pay_type,const std::string &content);
+  std::string PlaceOrder(const std::string& id, 
+  		const std::string& pay_type, const std::string &content);
   std::string CashPlaceOrder(const std::string& id);
 
   inline std::string get_appid() {
@@ -140,6 +138,8 @@ class ThirdOrder {
   //接收支付异步通知回调地址，通知url必须为直接可访问的url，不能携带参数。
   std::string notify_url;
   std::string pay_type;		//支付类型
+  std::string wechat_openid;		//微信支付类型使用
+  std::string wechat_appid;		//微信支付类型使用
   std::string content;		//交易描述
   std::string payment_info;
 //提现----------------------------------------------------------------------------------------------------------------
@@ -156,7 +156,7 @@ class ThirdOrder {
   std::string status;
 };
 ///
-extern int32 GetThirdCashStatus(const std::string &status);
+extern int32 GetSHFJCashStatus(const std::string &status);
 }
 
 #endif  // PUB_PAY_WXPAY_WX_ORDER_H_

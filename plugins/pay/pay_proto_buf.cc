@@ -173,7 +173,7 @@ bool WXPayOrder::set_http_packet(base_logic::DictionaryValue* value) {
 }
 
 
-bool ThirdPayOrder::set_http_packet(base_logic::DictionaryValue* value) {
+bool SHFJPayOrder::set_http_packet(base_logic::DictionaryValue* value) {
   int32 err = 0;
   bool r = false;
   int64 uid;
@@ -213,6 +213,18 @@ bool ThirdPayOrder::set_http_packet(base_logic::DictionaryValue* value) {
     set_pay_type(temp);
   else
     return false;
+  
+  r = value->GetString(L"wechatOpenId", &temp);
+  if (r)
+    set_wechat_openid(temp);
+  //else
+  //  return false;
+
+  r = value->GetString(L"wechatAppId", &temp);
+  if (r)
+    set_wechat_appid(temp);
+  //else
+   // return false;
 
   r = value->GetString(L"currency", &temp);
   if (r)
@@ -233,7 +245,7 @@ bool ThirdPayOrder::set_http_packet(base_logic::DictionaryValue* value) {
 }
 
 
-bool ThirdCashOrder::set_http_packet(base_logic::DictionaryValue* value) {
+bool SHFJCashOrder::set_http_packet(base_logic::DictionaryValue* value) {
   int32 err = 0;
   bool r = false;
   int64 uid;
@@ -292,13 +304,13 @@ bool ThirdCashOrder::set_http_packet(base_logic::DictionaryValue* value) {
 }
 
 
-bool ThirdPayServer::set_http_packet(base_logic::DictionaryValue* value) {
-  LOG_DEBUG2("ThirdPayServer_____set_http_packet___________%s", "test");
-  LOG_DEBUG2("ThirdPayServer_____set_http_packet___________%s", "test");
-  LOG_DEBUG2("ThirdPayServer_____set_http_packet___________%s", "test");
-  LOG_DEBUG2("ThirdPayServer_____set_http_packet___________%s", "test");
-  LOG_DEBUG2("ThirdPayServer_____set_http_packet___________%s", "test");
-  LOG_DEBUG2("ThirdPayServer_____set_http_packet___________%s", "test");
+bool SHFJPayServer::set_http_packet(base_logic::DictionaryValue* value) {
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________%s", "test");
   int32 err = 0;
   bool r = false;
   std::string tmp;
@@ -309,43 +321,51 @@ bool ThirdPayServer::set_http_packet(base_logic::DictionaryValue* value) {
   r = value->GetString(L"merchantNo", &tmp);
   if (r)
     set_mch_id(tmp);
-  else
-    return false;
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________merchantNo[%s]", tmp.c_str());
+  //else
+   // return false;
    r = value->GetString(L"tradeNo", &tmp);
    if (r)
      set_trade_no(tmp);
-   else
-     return false;
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________ tradeNo[%s]", tmp.c_str());
+  // else
+   //  return false;
    r = value->GetString(L"outTradeNo", &tmp);
    if (r)
      set_out_trade_no(tmp);
-   else
-     return false;
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________ outTradeNo[%s]", tmp.c_str());
+  // else
+   //  return false;
    r = value->GetString(L"outContext", &tmp);
    if (r)
      set_out_context(tmp);
-   else
-     return false;
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________ outContext[%s]", tmp.c_str());
+   //else
+    // return false;
    r = value->GetString(L"payType", &tmp);
    if (r)
      set_pay_type(tmp);
-   else
-     return false;
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________ payType[%s]", tmp.c_str());
+   //else
+    // return false;
    r = value->GetString(L"currency", &tmp);
    if (r)
      set_currency(tmp);
-   else
-     return false;
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________ currency[%s]", tmp.c_str());
+   //else
+    // return false;
    r = value->GetString(L"status", &tmp);
    if (r)
      set_status(tmp);
-   else
-     return false;     
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________ status[%s]", tmp.c_str());
+   //else
+    // return false;     
    r = value->GetString(L"settleType", &tmp);
    if (r)
      set_settle_type(tmp);
-   else
-     return false;
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________ settleType[%s]", tmp.c_str());
+  // else
+    // return false;
 /*
   base_logic::ValueSerializer* deserializer =
       base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &xml_str);
@@ -360,33 +380,36 @@ bool ThirdPayServer::set_http_packet(base_logic::DictionaryValue* value) {
   if (return_code.find("SUCCESS") == std::string::npos)
     return false;
 */
-  r = value->GetString(L"amount", &tmp);
-  if (r && tmp.length()>0)
-    set_amount(atoll(tmp.c_str()));
-  else
-    return false;
+  int64 tmp_i = 0;
+  r = value->GetBigInteger(L"amount", &tmp_i);
+  if (r)
+    set_amount(tmp_i);
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________ amount[%d]", tmp_i);
+  //else
+   // return false;
 
-  r = value->GetString(L"payedAmount", &tmp);
+  r = value->GetBigInteger(L"payedAmount", &tmp_i);
   if (r && tmp.length()>0)
-    set_payed_amount(atoll(tmp.c_str()));
-  else
-    return false;
+    set_payed_amount(tmp_i);
+  LOG_DEBUG2("SHFJPayServer_____set_http_packet___________ payedAmount[%d]", tmp_i);
+  //else
+   // return false;
 
   //LOG_DEBUG2("%s",xml_str.c_str());
   return true;
 }
 
 
-bool ThirdCashServer::set_http_packet(base_logic::DictionaryValue* value) {
-  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________%s", "test");
-  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________%s", "test");
-  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________%s", "test");
-  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________%s", "test");
-  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________%s", "test");
+bool SHFJCashServer::set_http_packet(base_logic::DictionaryValue* value) {
+  LOG_DEBUG2("SHFJCashServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("SHFJCashServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("SHFJCashServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("SHFJCashServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("SHFJCashServer_____set_http_packet___________%s", "test");
 //
   std::string xml_str; 
   value->GetString(L"result", &xml_str);
-  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________xml_str|%s", xml_str.c_str());
+  LOG_DEBUG2("SHFJCashServer_____set_http_packet___________xml_str|%s", xml_str.c_str());
 //
   int32 err = 0;
   bool r = false;
@@ -396,35 +419,35 @@ bool ThirdCashServer::set_http_packet(base_logic::DictionaryValue* value) {
     return false;
 //
   r = value->GetString(L"merchantNo", &tmp);
-  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________merchantNo|%s", tmp.c_str());
+  LOG_DEBUG2("SHFJCashServer_____set_http_packet___________merchantNo|%s", tmp.c_str());
   if (r)
     set_mch_id(tmp);
   //else
    // return false;
    r = value->GetString(L"payNo", &tmp);
-  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________ payNo|%s", tmp.c_str());
+  LOG_DEBUG2("SHFJCashServer_____set_http_packet___________ payNo|%s", tmp.c_str());
    if (r)
      set_pay_no(tmp);
    //else
     // return false;
    r = value->GetString(L"outPayNo", &tmp);
-  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________ outPayNo|%s", tmp.c_str());
+  LOG_DEBUG2("SHFJCashServer_____set_http_packet___________ outPayNo|%s", tmp.c_str());
    if (r)
      set_out_pay_no(tmp);
    else
      return false;
    r = value->GetString(L"errorCode", &tmp);
-  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________ errorCode|%s", tmp.c_str());
+  LOG_DEBUG2("SHFJCashServer_____set_http_packet___________ errorCode|%s", tmp.c_str());
    if (r)
      set_err_code(tmp);
      
    r = value->GetString(L"errorMsgString", &tmp);
-  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________ errorMsg|%s", tmp.c_str());
+  LOG_DEBUG2("SHFJCashServer_____set_http_packet___________ errorMsg|%s", tmp.c_str());
    if (r)
      set_err_msg(tmp);
      
    r = value->GetString(L"status", &tmp);
-  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________ status|%s", tmp.c_str());
+  LOG_DEBUG2("SHFJCashServer_____set_http_packet___________ status|%s", tmp.c_str());
    if (r)
      set_status(tmp);
    //else
@@ -445,7 +468,7 @@ bool ThirdCashServer::set_http_packet(base_logic::DictionaryValue* value) {
 */
   int64 tmp_i;
   r = value->GetBigInteger(L"amount", &tmp_i);
-  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________ amount|%d", tmp_i);
+  LOG_DEBUG2("SHFJCashServer_____set_http_packet___________ amount|%d", tmp_i);
   if (r)
     set_amount(tmp_i);
   //else

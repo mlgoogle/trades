@@ -1,7 +1,7 @@
 //  Copyright (c) 2017-2018 The SWP Authors. All rights reserved.
 //  Created on: 2017年1月12日 Author: kerry
 
-#include "pay/third_order.h"
+#include "pay/shfj_order.h"
 
 #include <iostream>
 #include <sstream>
@@ -11,7 +11,7 @@
 
 namespace pay_logic {
 ///---
-int32 GetThirdCashStatus(const std::string &status)
+int32 GetSHFJCashStatus(const std::string &status)
 {
   int32 r = 0;
   if (status == "PAYED")
@@ -25,13 +25,13 @@ int32 GetThirdCashStatus(const std::string &status)
   return r;
 }
 const std::string PASSWORD = "hsx888";
-ThirdOrder::ThirdOrder() {
+SHFJOrder::SHFJOrder() {
   total_fee = 0;
   fee = 0;
   transfer_amount = 0;  
 }
 
-ThirdOrder::~ThirdOrder() {
+SHFJOrder::~SHFJOrder() {
 }
 
 std::string UrlDecode(const std::string& szToDecode)  
@@ -75,7 +75,7 @@ std::string UrlDecode(const std::string& szToDecode)
 }   
 
 
-void ThirdOrder::InitWxVerify(const std::string& id, 
+void SHFJOrder::InitWxVerify(const std::string& id, 
                            const std::string& p_type, 
                            const std::string& ctent) {
   appid = id;
@@ -88,24 +88,13 @@ void ThirdOrder::InitWxVerify(const std::string& id,
   nonce_str = logic::SomeUtils::RandomString(32);
 }
 
-void ThirdOrder::InitWxVerify(const std::string& id) {
+void SHFJOrder::InitWxVerify(const std::string& id) {
 //cash use
   appid = id;
   mch_id = T_MCH_ID;
   notify_url = T_CASH_NOTIFY_URL;
 }
-/*
-void ThirdOrder::InitWxVerify() {
-  appid = T_APPID;
-  mch_id = T_MCH_ID;
-  notify_url = T_NOTIFY_URL;
-  trade_type = T_APP_TRADE_TYPE;
-  package = THIRD_PACKAGE;
-  key = T_APP_KEY;
-  nonce_str = logic::SomeUtils::RandomString(32);
-  //out_trade_no += logic::SomeUtils::RandomString(6);
-}
-*/
+
 static std::string Upper(std::string &text) {
   for (unsigned int i = 0; i < text.length(); i ++)
   {
@@ -115,7 +104,7 @@ static std::string Upper(std::string &text) {
 return text;
 }
 
-void ThirdOrder::PlaceOrderSign(const std::string &body, bool iscash) {
+void SHFJOrder::PlaceOrderSign(const std::string &body, bool iscash) {
   std::stringstream ss;
   //std::string req_url = THIRD_URL+"";
   std::string req_url = THIRD_URL + "com.opentech.cloud.easypay.trade.create/0.0.1";
@@ -143,7 +132,7 @@ void ThirdOrder::PlaceOrderSign(const std::string &body, bool iscash) {
 /*
 */
 
-std::string ThirdOrder::PostFiled(bool iscash) {
+std::string SHFJOrder::PostFiled(bool iscash) {
   base_logic::DictionaryValue dic;
 
   dic.SetBigInteger(L"amount", total_fee);
@@ -164,6 +153,8 @@ std::string ThirdOrder::PostFiled(bool iscash) {
     dic.SetString(L"merchantNo", mch_id);
     dic.SetString(L"outTradeNo", out_trade_no);
     dic.SetString(L"payType", pay_type);
+    dic.SetString(L"wechatOpenId", wechat_openid);
+    dic.SetString(L"wechatAppId", wechat_appid);
   }
 
   std::string filed = "";
@@ -174,7 +165,7 @@ std::string ThirdOrder::PostFiled(bool iscash) {
                                                 serializer);
   return filed;
 }
-void ThirdOrder::Set_Headers(http::HttpMethodPost &hmp)
+void SHFJOrder::Set_Headers(http::HttpMethodPost &hmp)
 {
   std::string headers = "x-oapi-pv: 0.0.1";
   hmp.SetHeaders(headers); //api version
@@ -198,7 +189,7 @@ void ThirdOrder::Set_Headers(http::HttpMethodPost &hmp)
   hmp.SetHeaders(headers); 
 }
 
-std::string ThirdOrder::CashPlaceOrder(const std::string& id) {
+std::string SHFJOrder::CashPlaceOrder(const std::string& id) {
   InitWxVerify(id);
   std::string body = PostFiled(true);
   PlaceOrderSign(body ,true);
@@ -236,7 +227,7 @@ std::string ThirdOrder::CashPlaceOrder(const std::string& id) {
   return result;
 }
 
-std::string ThirdOrder::PlaceOrder(const std::string& id, 
+std::string SHFJOrder::PlaceOrder(const std::string& id, 
                                 const std::string& pay_type,
                                 const std::string& content) {
   LOG_ERROR("PlaceOrder start..................\n"); //tw test
@@ -254,13 +245,22 @@ std::string ThirdOrder::PlaceOrder(const std::string& id,
 
 ////get header message
   std::string err_key = "x-oapi-error-code";
-  MIG_VALUE err_value;
+  MIG_VALUE err_value, mes_value;
   
   hmp.GetHeader(err_key, err_value);
-  MIG_VALUE::iterator iter;
+  MIG_VALUE::iterator iter, msg_iter;
   for (iter = err_value.begin(); iter != err_value.end(); iter++)
     LOG_DEBUG2("err_value_____[%s]", iter->c_str());
 
+  std::string msg_key = "x-oapi-msg";
+  hmp.GetHeader(msg_key, mes_value);
+
+  for (msg_iter = mes_value.begin(); msg_iter != mes_value.end(); msg_iter ++)
+  {
+    LOG_DEBUG2("msg_value_____[%s]", msg_iter->c_str());
+    LOG_DEBUG2("msg_value_____[%s]", UrlDecode((*msg_iter)).c_str());
+
+  }
 /////
 
   //LOG(INFO)<< "http post result:" << result;

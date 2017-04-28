@@ -38,24 +38,24 @@ void PayManager::InitSchdulerEngine(
   schduler_engine_ = schduler_engine;
 }
 
-bool PayManager::OnThirdCreateCashOrder(const int socket, const int64 session,
+bool PayManager::OnSHFJCreateCashOrder(const int socket, const int64 session,
                                  const int32 reversed, const int64 uid,
                                  const double price,const int64 bid,
                                  const std::string& rec_bank_name, const std::string& rec_bra_bank_name,
 				 const std::string& rec_card_no, const std::string& rec_account_name) {
-  pay_logic::net_reply::ThirdCashOrder r_third_cash_order;	//返回数据结构
+  pay_logic::net_reply::SHFJCashOrder r_shfj_cash_order;	//返回数据结构
   //创建取现订单号
-  pay_logic::ThirdOrder third_order;
+  pay_logic::SHFJOrder shfj_order;
   int64 rid = base::SysRadom::GetInstance()->GetRandomID();
 
-  bool r = ThirdCashOrder(socket, rid, price, rec_bank_name, rec_bra_bank_name, rec_card_no, rec_account_name,third_order, r_third_cash_order);
+  bool r = SHFJCashOrder(socket, rid, price, rec_bank_name, rec_bra_bank_name, rec_card_no, rec_account_name,shfj_order, r_shfj_cash_order);
   if (!r) {
     send_error(socket, ERROR_TYPE, THIRD_CASH_ORDER_ERROR, session);
     return false;
   }
 //数据库操作创建取现订单记录
 //
-  int status = pay_logic::GetThirdCashStatus(r_third_cash_order.status());  //
+  int status = pay_logic::GetSHFJCashStatus(r_shfj_cash_order.status());  //
 
   r = pay_db_->OnCreateWithdrawOrder(uid, rid, price, bid, status);
   if (!r) {
@@ -66,21 +66,26 @@ bool PayManager::OnThirdCreateCashOrder(const int socket, const int64 session,
   struct PacketControl packet_control;
 
   MAKE_HEAD(packet_control, S_THIRD_PAY, USER_TYPE, 0, session, 0);
-  packet_control.body_ = r_third_cash_order.get();
+  packet_control.body_ = r_shfj_cash_order.get();
   send_message(socket, &packet_control);
   return true;
 }
 
 
-bool PayManager::OnThirdCreateOrder(const int socket, const int64 session,
+bool PayManager::OnSHFJCreateOrder(const int socket, const int64 session,
                                  const int32 reversed, const int64 uid,
                                  const double price,
-                                 const std::string& pay_type, const std::string& content) {
+                                 const std::string& pay_type, 
+                         	 const std::string &wechat_openid,
+                         	 const std::string &wechat_appid,
+				 const std::string& content) {
   //创建订单号
-  pay_logic::ThirdOrder third_order;
+  pay_logic::SHFJOrder shfj_order;
   int64 rid = base::SysRadom::GetInstance()->GetRandomID();//
   
-  bool r = ThirdOrder(socket,  rid, price, pay_type,content ,third_order);
+  bool r = SHFJOrder(socket,  rid, price, pay_type,
+  			wechat_openid, wechat_appid, 
+			content ,shfj_order);
   if (!r) {
     send_error(socket, ERROR_TYPE, THIRD_ORDER_ERROR, session);
     return false;
@@ -91,18 +96,18 @@ bool PayManager::OnThirdCreateOrder(const int socket, const int64 session,
     send_error(socket, ERROR_TYPE, STOAGE_ORDER_ERROR, session);
     return r;
   }
-  pay_logic::net_reply::ThirdPayOrder r_third_order;
+  pay_logic::net_reply::SHFJPayOrder r_shfj_order;
   struct PacketControl packet_control;
 
   MAKE_HEAD(packet_control, S_THIRD_PAY, USER_TYPE, 0, session, 0);
-  r_third_order.set_payment_info(third_order.get_payment_info());
-  packet_control.body_ = r_third_order.get();
+  r_shfj_order.set_payment_info(shfj_order.get_payment_info());
+  packet_control.body_ = r_shfj_order.get();
   send_message(socket, &packet_control);
   return true;
 }
 
 
-bool PayManager::ParserThirdOrderResult(std::string& result,
+bool PayManager::ParserSHFJOrderResult(std::string& result,
                                      std::string& prepay_id) {
   base_logic::ValueSerializer* deserializer =
       base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &result);
@@ -123,7 +128,7 @@ bool PayManager::ParserThirdOrderResult(std::string& result,
   return true;
 }
 
-bool PayManager::ParserThirdCashOrderResult(std::string& result, pay_logic::net_reply::ThirdCashOrder &t_third_cash_order) {
+bool PayManager::ParserSHFJCashOrderResult(std::string& result, pay_logic::net_reply::SHFJCashOrder &t_shfj_cash_order) {
   base_logic::ValueSerializer* deserializer =
       base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &result);
   std::string err_str;
@@ -139,18 +144,18 @@ bool PayManager::ParserThirdCashOrderResult(std::string& result, pay_logic::net_
   r = dic->GetString(L"merchantNo", &tmp);
   if (!r)
     return false;
-  t_third_cash_order.set_merchant_no(tmp);
+  t_shfj_cash_order.set_merchant_no(tmp);
   LOG_DEBUG2("merchantNo_________: %s", tmp.c_str());
   r = dic->GetString(L"status", &tmp);
   if (!r)
     return false;
-  t_third_cash_order.set_status(tmp);
+  t_shfj_cash_order.set_status(tmp);
   LOG_DEBUG2("status_________: %s", tmp.c_str());
 
   r = dic->GetString(L"payNo", &tmp);
   if (!r)
     return false;
-  t_third_cash_order.set_pay_no(tmp);
+  t_shfj_cash_order.set_pay_no(tmp);
   LOG_DEBUG2("payNo_________: %s", tmp.c_str());
   //
   //
@@ -158,28 +163,31 @@ bool PayManager::ParserThirdCashOrderResult(std::string& result, pay_logic::net_
   r = dic->GetBigInteger(L"amount", &tmp_i);
   if (!r)
     return false;
-  t_third_cash_order.set_amount(tmp_i/100.0);
+  t_shfj_cash_order.set_amount(tmp_i/100.0);
   LOG_DEBUG2("amount_________: %d", tmp_i);
   //
   r = dic->GetBigInteger(L"fee", &tmp_i);
   if (!r)
     return false;
-  t_third_cash_order.set_fee(tmp_i/100.0);
+  t_shfj_cash_order.set_fee(tmp_i/100.0);
   LOG_DEBUG2("fee_________: %d", tmp_i);
   //
   //
   r = dic->GetBigInteger(L"transferAmount", &tmp_i);
   if (!r)
     return false;
-  t_third_cash_order.set_transfer_amount(tmp_i/100);
+  t_shfj_cash_order.set_transfer_amount(tmp_i/100);
   LOG_DEBUG2("transfer_________: %d", tmp_i);
   //
   return true;
 }
-bool PayManager::ThirdOrder(const int socket, 
+bool PayManager::SHFJOrder(const int socket, 
                          const int64 rid, const double price,
-                         const std::string &pay_type,const std::string& content, 
-                         pay_logic::ThirdOrder& third_order) {
+                         const std::string &pay_type,
+                         const std::string &wechat_openid,
+                         const std::string &wechat_appid,
+			 const std::string& content, 
+                         pay_logic::SHFJOrder& shfj_order) {
 
   LOG_ERROR2("tw________price[%lf],pay_type[%s],content[%s]\n", price, pay_type.c_str(), content.c_str()); //tw test
   std::string payment_info;
@@ -187,47 +195,49 @@ bool PayManager::ThirdOrder(const int socket,
   std::string app_id;
   int port;
   if (logic::SomeUtils::GetIPAddress(socket, ip, port))
-    third_order.set_spbill_create_ip(ip);
+    shfj_order.set_spbill_create_ip(ip);
 
   std::string str_rid = base::BasicUtil::StringUtil::Int64ToString(rid);
-  third_order.set_out_trade_no(str_rid);
-  third_order.set_total_fee(price * 100);
-  std::string third_result = third_order.PlaceOrder(app_id, pay_type, content);
-  bool r = ParserThirdOrderResult(third_result, payment_info);
+  shfj_order.set_out_trade_no(str_rid);
+  shfj_order.set_wechat_openid(wechat_openid);
+  shfj_order.set_wechat_appid(wechat_appid);
+  shfj_order.set_total_fee(price * 100);
+  std::string shfj_result = shfj_order.PlaceOrder(app_id, pay_type, content);
+  bool r = ParserSHFJOrderResult(shfj_result, payment_info);
   if (!r)
     return false;
-  third_order.set_payment_info(payment_info);
-  //third_order.PreSign();
+  shfj_order.set_payment_info(payment_info);
+  //shfj_order.PreSign();
   return true;
 }
 
 
-bool PayManager::ThirdCashOrder(const int socket, 
+bool PayManager::SHFJCashOrder(const int socket, 
                          const int64 rid, const double price,
                          const std::string &rec_bank_name,const std::string& rec_bra_bank_name, const std::string &rec_card_no, const std::string &rec_account_name, 
-                         pay_logic::ThirdOrder& third_order, pay_logic::net_reply::ThirdCashOrder &r_third_cash_order) {
+                         pay_logic::SHFJOrder& shfj_order, pay_logic::net_reply::SHFJCashOrder &r_shfj_cash_order) {
 
   //std::string prepay_id;
   std::string ip;
   std::string app_id;
   int port;
   if (logic::SomeUtils::GetIPAddress(socket, ip, port))
-    third_order.set_spbill_create_ip(ip);
+    shfj_order.set_spbill_create_ip(ip);
 
-  //third_order.set_body(title);
+  //shfj_order.set_body(title);
   std::string str_rid = base::BasicUtil::StringUtil::Int64ToString(rid);
-  third_order.set_out_trade_no(str_rid);
-  third_order.set_total_fee(price * 100);
-  third_order.set_rec_bank_name(rec_bank_name);
-  third_order.set_rec_branch_bank_name(rec_bra_bank_name);
-  third_order.set_rec_card_no(rec_card_no);
-  third_order.set_rec_account_name(rec_account_name);
-  std::string third_result = third_order.CashPlaceOrder(app_id);
-  bool r = ParserThirdCashOrderResult(third_result, r_third_cash_order);
+  shfj_order.set_out_trade_no(str_rid);
+  shfj_order.set_total_fee(price * 100);
+  shfj_order.set_rec_bank_name(rec_bank_name);
+  shfj_order.set_rec_branch_bank_name(rec_bra_bank_name);
+  shfj_order.set_rec_card_no(rec_card_no);
+  shfj_order.set_rec_account_name(rec_account_name);
+  std::string shfj_result = shfj_order.CashPlaceOrder(app_id);
+  bool r = ParserSHFJCashOrderResult(shfj_result, r_shfj_cash_order);
   if (!r)
     return false;
-  //third_order.set_payment_info(prepay_id);
-  //third_order.PreSign();
+  //shfj_order.set_payment_info(prepay_id);
+  //shfj_order.PreSign();
   return true;
 }
 //--------------------------WX_ORDER--------------------------------------
@@ -385,9 +395,9 @@ bool PayManager::OnWXServer(const int socket, const std::string& appid,
   }
   return true;
 }
-//-------------third callback
+//-------------shfj callback
 
-bool PayManager::OnThirdServer(const int socket, const std::string& appid,
+bool PayManager::OnSHFJServer(const int socket, const std::string& appid,
                             const std::string& mch_id, const int64 total_fee,
                             const int64 rid, const int64 result,
                             const std::string& transaction_id) {
@@ -418,7 +428,7 @@ bool PayManager::OnThirdServer(const int socket, const std::string& appid,
 }
 
 
-bool PayManager::OnThirdCashServer(const int socket, 
+bool PayManager::OnSHFJCashServer(const int socket, 
                             const std::string& mch_id, 
 			    const int64 total_fee,
                             const std::string& transaction_id,

@@ -9,7 +9,7 @@
 #include "pay/pay_proto_buf.h"
 #include "pay/pay_db.h"
 #include "pay/wx_order.h"
-#include "pay/third_order.h"
+#include "pay/shfj_order.h"
 #include "thread/base_thread_handler.h"
 #include "thread/base_thread_lock.h"
 
@@ -32,13 +32,16 @@ class PayManager {
                        const std::string& title, const double price,const int32 pay_type,
                        const std::string& open_id);
 
-  bool OnThirdCreateCashOrder(const int socket, const int64 session,
+  bool OnSHFJCreateCashOrder(const int socket, const int64 session,
                        const int32 reversed, const int64 uid,
                        const double price,const int64 bid,const std::string& rec_bank_name, const std::string& rec_bra_bank_name, 
 		       const std::string &rec_card_no, const std::string &rec_account_name);
-  bool OnThirdCreateOrder(const int socket, const int64 session,
+  bool OnSHFJCreateOrder(const int socket, const int64 session,
                        const int32 reversed, const int64 uid,
-                       const double price,const std::string& pay_type,
+                       const double price,
+		       const std::string& pay_type,
+		       const std::string &wechat_openid,
+		       const std::string &wechat_appid,
                        const std::string& content);
 
   bool OnWXClient(const int socket, const int64 session, const int32 reversed,
@@ -48,11 +51,11 @@ class PayManager {
                   const int64 total_fee, const int64 rid,
                   const int64 result, const std::string& transaction_id);
 
-  bool OnThirdServer(const int socket, const std::string& appid, const std::string& mch_id,
+  bool OnSHFJServer(const int socket, const std::string& appid, const std::string& mch_id,
                   const int64 total_fee, const int64 rid,
                   const int64 result, const std::string& transaction_id);
 
-bool OnThirdCashServer(const int socket, const std::string& mch_id, 
+bool OnSHFJCashServer(const int socket, const std::string& mch_id, 
 			const int64 total_fee, const std::string& transaction_id, 
 			const int64 status, const std::string& rid); 
  private:
@@ -63,15 +66,18 @@ bool OnThirdCashServer(const int socket, const std::string& mch_id,
   bool ParserWXOrderResult(std::string& result, std::string& prepay_id);
 
 
-  bool ThirdOrder(const int socket, const int64 rid,
-               const double price,const std::string& pay_type, const std::string& content,
-               pay_logic::ThirdOrder& third_order);
-  bool ThirdCashOrder(const int socket, const int64 rid,
+  bool SHFJOrder(const int socket, const int64 rid,
+  		const double price,const std::string& pay_type, 
+  		const std::string& wechat_openid,
+		const std::string& wechat_appid, 
+		const std::string& content,
+               pay_logic::SHFJOrder& shfj_order);
+  bool SHFJCashOrder(const int socket, const int64 rid,
                const double price,const std::string& rec_bank_name, const std::string& rec_bra_bank_name, const std::string &rec_card_no, const std::string &rec_account_name,
-               pay_logic::ThirdOrder& third_order, pay_logic::net_reply::ThirdCashOrder &r_third_cash_order);
+               pay_logic::SHFJOrder& shfj_order, pay_logic::net_reply::SHFJCashOrder &r_shfj_cash_order);
 
-  bool ParserThirdOrderResult(std::string& result, std::string& prepay_id);
-  bool ParserThirdCashOrderResult(std::string& result, pay_logic::net_reply::ThirdCashOrder &r_third_cash_order);
+  bool ParserSHFJOrderResult(std::string& result, std::string& prepay_id);
+  bool ParserSHFJCashOrderResult(std::string& result, pay_logic::net_reply::SHFJCashOrder &r_shfj_cash_order);
  private:
   pay_logic::PayDB* pay_db_;
   PayCache *pay_cache_;
