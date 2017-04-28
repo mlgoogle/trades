@@ -187,8 +187,8 @@ bool ThirdPayOrder::set_http_packet(base_logic::DictionaryValue* value) {
   r = value->GetBigInteger(L"id", &uid);
   if (r)
     set_uid(uid);
-  //else
-   // return false;
+  else
+    return false;
 
   r = value->GetString(L"merchantNo", &temp);
   if (r)
@@ -375,6 +375,98 @@ bool ThirdPayServer::set_http_packet(base_logic::DictionaryValue* value) {
   //LOG_DEBUG2("%s",xml_str.c_str());
   return true;
 }
+
+
+bool ThirdCashServer::set_http_packet(base_logic::DictionaryValue* value) {
+  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________%s", "test");
+  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________%s", "test");
+//
+  std::string xml_str; 
+  value->GetString(L"result", &xml_str);
+  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________xml_str|%s", xml_str.c_str());
+//
+  int32 err = 0;
+  bool r = false;
+  std::string tmp;
+
+  if (value == NULL)
+    return false;
+//
+  r = value->GetString(L"merchantNo", &tmp);
+  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________merchantNo|%s", tmp.c_str());
+  if (r)
+    set_mch_id(tmp);
+  //else
+   // return false;
+   r = value->GetString(L"payNo", &tmp);
+  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________ payNo|%s", tmp.c_str());
+   if (r)
+     set_pay_no(tmp);
+   //else
+    // return false;
+   r = value->GetString(L"outPayNo", &tmp);
+  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________ outPayNo|%s", tmp.c_str());
+   if (r)
+     set_out_pay_no(tmp);
+   else
+     return false;
+   r = value->GetString(L"errorCode", &tmp);
+  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________ errorCode|%s", tmp.c_str());
+   if (r)
+     set_err_code(tmp);
+     
+   r = value->GetString(L"errorMsgString", &tmp);
+  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________ errorMsg|%s", tmp.c_str());
+   if (r)
+     set_err_msg(tmp);
+     
+   r = value->GetString(L"status", &tmp);
+  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________ status|%s", tmp.c_str());
+   if (r)
+     set_status(tmp);
+   //else
+    // return false;     
+/*
+  base_logic::ValueSerializer* deserializer =
+      base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &xml_str);
+  base_logic::DictionaryValue* json_value =
+      (base_logic::DictionaryValue*) deserializer->Deserialize(&err, &err_str);
+*/
+
+/*
+  r = xml_value->GetString(L"return_code", &return_code);
+  if (!r)
+    return false;
+  if (return_code.find("SUCCESS") == std::string::npos)
+    return false;
+*/
+  int64 tmp_i;
+  r = value->GetBigInteger(L"amount", &tmp_i);
+  LOG_DEBUG2("ThirdCashServer_____set_http_packet___________ amount|%d", tmp_i);
+  if (r)
+    set_amount(tmp_i);
+  //else
+   // return false;
+
+  r = value->GetBigInteger(L"transferAmount", &tmp_i);
+  if (r)
+    set_transfer_amount(tmp_i);
+  //else
+   // return false;
+
+  r = value->GetBigInteger(L"fee", &tmp_i);
+  if (r)
+    set_fee(tmp_i);
+  //else
+   // return false;
+
+  LOG_DEBUG2("________________________end_________________________%s","llllllllllllllllll");
+  return true;
+}
+
 }
 
 }

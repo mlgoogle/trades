@@ -155,7 +155,8 @@ class ThirdOrder {
   std::string pay_no;
   std::string status;
 };
-
+///
+extern int32 GetThirdCashStatus(const std::string &status);
 }
 
 #endif  // PUB_PAY_WXPAY_WX_ORDER_H_

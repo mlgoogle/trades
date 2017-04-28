@@ -58,14 +58,14 @@ class Paylogic {
   bool OnThirdPayOrder(struct server* srv, int socket,
                     struct PacketHead *packet);
 
-  bool OnThirdCashOrder(struct server* srv, int socket,
-                    struct PacketHead *packet);
-
   bool OnThirdPayClient(struct server* srv, int socket,
                      struct PacketHead *packet);
 
   bool OnThirdPaySever(struct server* srv, int socket,
                     struct PacketHead * packet);
+
+  bool OnThirdCashOrder(struct server* srv, int socket,
+                    struct PacketHead *packet);
   bool OnThirdCashServer(struct server* srv, int socket,
                     struct PacketHead * packet);
  private:

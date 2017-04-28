@@ -10,7 +10,20 @@
 #include "logic/logic_comm.h"
 
 namespace pay_logic {
-
+///---
+int32 GetThirdCashStatus(const std::string &status)
+{
+  int32 r = 0;
+  if (status == "PAYED")
+    r = 2; //提现成功
+  else if (status == "PYAING")
+    r = 1; //提现中
+  else if (status == "PAY_FAILED")
+    r = 3; //付款失败
+  else if (status == "REFUND")
+    r = 4; //已退款
+  return r;
+}
 const std::string PASSWORD = "hsx888";
 ThirdOrder::ThirdOrder() {
   total_fee = 0;

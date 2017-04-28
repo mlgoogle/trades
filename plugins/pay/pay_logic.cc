@@ -80,21 +80,18 @@ bool Paylogic::OnPayConnect(struct server *srv, const int socket) {
 
 bool Paylogic::OnPayMessage(struct server *srv, const int socket,
                             const void *msg, const int len) {
-  LOG_ERROR2("start ...........Error socket %d", socket);
   bool r = false;
   struct PacketHead *packet = NULL;
   if (srv == NULL || socket < 0 || msg == NULL || len < PACKET_HEAD_LENGTH)
     return false;
 
   if (!net::PacketProsess::UnpackStream(msg, len, &packet)) {
-    LOG_ERROR2("UnpackStream Error socket %d", socket);
     send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
     return false;
   }
 	
 try
 {
-  LOG_ERROR2("operator_code[%d]", packet->operate_code); //tw test
   switch (packet->operate_code) {
     case R_WEIXIN_PAY: {
       OnWXPayOrder(srv, socket, packet);
@@ -111,7 +108,6 @@ try
 
     case R_THIRD_PAY: {
       OnThirdPayOrder(srv, socket, packet);
-	  LOG_ERROR2("operator_code[%d]", packet->operate_code); //tw test
       break;
     }
     case R_THIRD_CLT: {
@@ -131,14 +127,15 @@ try
       break;
     }
     default:
-	  LOG_ERROR2("default_____________________[%d]", packet->operate_code); //tw test
       break;
   }
-  LOG_ERROR2("default_____________________[%d]", packet->operate_code); //tw test
 }
 catch (...)
 {
-    LOG_ERROR2("operator_code[%d]", packet->operate_code);
+    LOG_ERROR2("operator_code[%d]__________________________________________________", packet->operate_code);
+    LOG_ERROR2("operator_code[%d]__________________________________________________", packet->operate_code);
+    LOG_ERROR2("operator_code[%d]__________________________________________________", packet->operate_code);
+    LOG_ERROR2("operator_code[%d]__________________________________________________", packet->operate_code);
 }
   return true;
 }
@@ -248,8 +245,7 @@ bool Paylogic::OnWXPaySever(struct server* srv, int socket,
 
 bool Paylogic::OnThirdPayOrder(struct server* srv, int socket,
                             struct PacketHead *packet) {
-  LOG_ERROR2("tw________packet_length[%d]", packet->packet_length); //tw test
-  LOG_DEBUG2("tw________packet_length[%d]", packet->packet_length); //tw test
+ 
   pay_logic::net_request::ThirdPayOrder third_pay_order;
   if (packet->packet_length <= PACKET_HEAD_LENGTH) {
     send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
@@ -268,8 +264,6 @@ bool Paylogic::OnThirdPayOrder(struct server* srv, int socket,
       third_pay_order.amount(),third_pay_order.pay_type(),
       third_pay_order.content());
 
-
-  LOG_ERROR2("tw________packet_length....end[%d]", packet->packet_length); //tw test
   return true;
 }
 
@@ -301,6 +295,7 @@ bool Paylogic::OnThirdCashOrder(struct server* srv, int socket,
 
 bool Paylogic::OnThirdPayClient(struct server* srv, int socket,
                              struct PacketHead *packet) {
+/*
   pay_logic::net_request::WXPayClient wx_pay_client;
   if (packet->packet_length <= PACKET_HEAD_LENGTH) {
     send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
@@ -317,7 +312,7 @@ bool Paylogic::OnThirdPayClient(struct server* srv, int socket,
   pay_logic::PayEngine::GetSchdulerManager()->OnWXClient(
       socket, packet->session_id, packet->reserved, wx_pay_client.uid(),
       wx_pay_client.rid(), wx_pay_client.pay_result());
-
+*/
   return true;
 }
 
@@ -338,15 +333,36 @@ bool Paylogic::OnThirdPaySever(struct server* srv, int socket,
   bool r = third_pay_sever.set_http_packet(packet_control->body_);
   if (!r) {
     LOG_DEBUG2("packet_length %d",packet->packet_length);
-    const std::string r_rt = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+    const std::string r_rt = "{\"third_pay\":\"\"}";
     send_full(socket, r_rt.c_str(), r_rt.length());
     return false;
   }
+//out_trade_no --> int64 status--> type
+  try
+  {
+    int64 result = 1;
+    if (third_pay_sever.status() == "PAYED_FAILED"
+       || third_pay_sever.status() == "SETTLED_FAILED" )
+    {
+      result = 2;
+      return false;
+    }
+    else if (third_pay_sever.status() != "PAYED"
+    	|| third_pay_sever.status() != "SETTLED")
+	result = 3;
 
-  pay_logic::PayEngine::GetSchdulerManager()->OnThirdServer(
-      socket, third_pay_sever.pay_type(), third_pay_sever.mch_id(),
-      third_pay_sever.amount(), 0,
-      0, third_pay_sever.trade_no());
+    pay_logic::PayEngine::GetSchdulerManager()->OnThirdServer(
+        socket, third_pay_sever.pay_type(), third_pay_sever.mch_id(),
+        third_pay_sever.amount(), atoll(third_pay_sever.out_trade_no().c_str()),
+        result , third_pay_sever.trade_no());
+  }
+  catch (...)
+  {
+    LOG_ERROR2("OnThirdPayServer exception socket %d___________", socket);
+    LOG_ERROR2("OnThirdPayServer exception socket %d___________", socket);
+    LOG_ERROR2("OnThirdPayServer exception socket %d___________", socket);
+    LOG_ERROR2("OnThirdPayServer exception socket %d___________", socket);
+  }
 
   return true;
 }
@@ -355,29 +371,32 @@ bool Paylogic::OnThirdPaySever(struct server* srv, int socket,
 bool Paylogic::OnThirdCashServer(struct server* srv, int socket,
                             struct PacketHead * packet) {
 
+  LOG_DEBUG2("OnThirdCashServer_______________________packet_length________________ %d",packet->packet_length);
   LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
   LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
   LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
   LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
-  LOG_DEBUG2("_______________________packet_length________________ %d",packet->packet_length);
-  pay_logic::net_request::ThirdPayServer third_pay_sever;
+  pay_logic::net_request::ThirdCashServer third_cash_sever;
   if (packet->packet_length <= PACKET_HEAD_LENGTH) {
     send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
     return false;
   }
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
-  bool r = third_pay_sever.set_http_packet(packet_control->body_);
+  bool r = third_cash_sever.set_http_packet(packet_control->body_);
   if (!r) {
     LOG_DEBUG2("packet_length %d",packet->packet_length);
     const std::string r_rt = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
     send_full(socket, r_rt.c_str(), r_rt.length());
     return false;
   }
-
-  pay_logic::PayEngine::GetSchdulerManager()->OnThirdServer(
-      socket, third_pay_sever.pay_type(), third_pay_sever.mch_id(),
-      third_pay_sever.amount(), 0,
-      0, third_pay_sever.trade_no());
+  int64 status = pay_logic::GetThirdCashStatus(third_cash_sever.status());
+  
+  //if (third_cash_sever.status() == "PAYED")
+   // status = 2;
+  pay_logic::PayEngine::GetSchdulerManager()->OnThirdCashServer(
+      socket, third_cash_sever.mch_id(),
+      third_cash_sever.amount(), third_cash_sever.pay_no(),
+      status, third_cash_sever.out_pay_no());
 
   return true;
 }

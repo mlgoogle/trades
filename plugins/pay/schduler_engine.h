@@ -52,6 +52,9 @@ class PayManager {
                   const int64 total_fee, const int64 rid,
                   const int64 result, const std::string& transaction_id);
 
+bool OnThirdCashServer(const int socket, const std::string& mch_id, 
+			const int64 total_fee, const std::string& transaction_id, 
+			const int64 status, const std::string& rid); 
  private:
   bool WXOrder(const int socket, const std::string& title, const int64 rid,
                const double price,const int32 pay_type, const std::string& open_id,

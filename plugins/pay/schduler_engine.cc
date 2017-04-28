@@ -38,44 +38,34 @@ void PayManager::InitSchdulerEngine(
   schduler_engine_ = schduler_engine;
 }
 
-
-
-
 bool PayManager::OnThirdCreateCashOrder(const int socket, const int64 session,
                                  const int32 reversed, const int64 uid,
                                  const double price,const int64 bid,
                                  const std::string& rec_bank_name, const std::string& rec_bra_bank_name,
 				 const std::string& rec_card_no, const std::string& rec_account_name) {
-  pay_logic::net_reply::ThirdCashOrder r_third_cash_order;
+  pay_logic::net_reply::ThirdCashOrder r_third_cash_order;	//返回数据结构
   //创建取现订单号
   pay_logic::ThirdOrder third_order;
   int64 rid = base::SysRadom::GetInstance()->GetRandomID();
 
-  bool r = ThirdCashOrder(socket,  rid, price, rec_bank_name, rec_bra_bank_name, rec_card_no, rec_account_name,third_order, r_third_cash_order);
+  bool r = ThirdCashOrder(socket, rid, price, rec_bank_name, rec_bra_bank_name, rec_card_no, rec_account_name,third_order, r_third_cash_order);
   if (!r) {
     send_error(socket, ERROR_TYPE, THIRD_CASH_ORDER_ERROR, session);
     return false;
   }
 //数据库操作创建取现订单记录
-  r = pay_db_->OnCreateWithdrawOrder(uid, rid, price, bid);
+//
+  int status = pay_logic::GetThirdCashStatus(r_third_cash_order.status());  //
+
+  r = pay_db_->OnCreateWithdrawOrder(uid, rid, price, bid, status);
   if (!r) {
     send_error(socket, ERROR_TYPE, STOAGE_ORDER_ERROR, session);
     return r;
   }
+//返回处理
   struct PacketControl packet_control;
 
-  //std::string package;
-/*
-  if (0 == pay_type){
-    package = third_order.get_package();
-  }else {
-    package = "prepay_id=" + third_order.get_prepayid();
-  }
-*/
   MAKE_HEAD(packet_control, S_THIRD_PAY, USER_TYPE, 0, session, 0);
-  //r_third_cash_order.set_payment_info(third_order.get_payment_info());
-  //r_third_cash_order.set_sign(third_order.get_prepaysign());
-  //r_third_cash_order.set_rid(rid);
   packet_control.body_ = r_third_cash_order.get();
   send_message(socket, &packet_control);
   return true;
@@ -88,16 +78,14 @@ bool PayManager::OnThirdCreateOrder(const int socket, const int64 session,
                                  const std::string& pay_type, const std::string& content) {
   //创建订单号
   pay_logic::ThirdOrder third_order;
-  int64 rid = base::SysRadom::GetInstance()->GetRandomID();
-  LOG_ERROR2("tw___1111_____price[%lf],pay_type[%s],content[%s]\n", price, pay_type.c_str(), content.c_str()); //tw test
-  //base_logic::DictionaryValue recharge_dic;
+  int64 rid = base::SysRadom::GetInstance()->GetRandomID();//
+  
   bool r = ThirdOrder(socket,  rid, price, pay_type,content ,third_order);
   if (!r) {
     send_error(socket, ERROR_TYPE, THIRD_ORDER_ERROR, session);
     return false;
   }
 
-  LOG_ERROR2("tw___222_____price[%lf],pay_type[%s],content[%s]\n", price, pay_type.c_str(), content.c_str()); //tw test
   r = pay_db_->OnCreateRechargeOrder(uid, rid, price, UNIPNPAY);
   if (!r) {
     send_error(socket, ERROR_TYPE, STOAGE_ORDER_ERROR, session);
@@ -106,21 +94,8 @@ bool PayManager::OnThirdCreateOrder(const int socket, const int64 session,
   pay_logic::net_reply::ThirdPayOrder r_third_order;
   struct PacketControl packet_control;
 
-  std::string package;
-/*
-  if (0 == pay_type){
-    package = third_order.get_package();
-  }else {
-    package = "prepay_id=" + third_order.get_prepayid();
-  }
-*/
-  LOG_ERROR2("tw___333_____price[%lf],pay_type[%s],content[%s]\n", price, pay_type.c_str(), content.c_str()); //tw test
   MAKE_HEAD(packet_control, S_THIRD_PAY, USER_TYPE, 0, session, 0);
   r_third_order.set_payment_info(third_order.get_payment_info());
-  //r_third_order.set_partnerid(third_order.get_partnerid());
-  //r_third_order.set_prepayid(third_order.get_prepayid());
-  //r_third_order.set_sign(third_order.get_prepaysign());
-  //r_third_order.set_rid(rid);
   packet_control.body_ = r_third_order.get();
   send_message(socket, &packet_control);
   return true;
@@ -207,22 +182,21 @@ bool PayManager::ThirdOrder(const int socket,
                          pay_logic::ThirdOrder& third_order) {
 
   LOG_ERROR2("tw________price[%lf],pay_type[%s],content[%s]\n", price, pay_type.c_str(), content.c_str()); //tw test
-  std::string prepay_id;
+  std::string payment_info;
   std::string ip;
   std::string app_id;
   int port;
   if (logic::SomeUtils::GetIPAddress(socket, ip, port))
     third_order.set_spbill_create_ip(ip);
 
-  //third_order.set_body(title);
   std::string str_rid = base::BasicUtil::StringUtil::Int64ToString(rid);
   third_order.set_out_trade_no(str_rid);
   third_order.set_total_fee(price * 100);
   std::string third_result = third_order.PlaceOrder(app_id, pay_type, content);
-  bool r = ParserThirdOrderResult(third_result, prepay_id);
+  bool r = ParserThirdOrderResult(third_result, payment_info);
   if (!r)
     return false;
-  third_order.set_payment_info(prepay_id);
+  third_order.set_payment_info(payment_info);
   //third_order.PreSign();
   return true;
 }
@@ -423,6 +397,40 @@ bool PayManager::OnThirdServer(const int socket, const std::string& appid,
   bool r = pay_db_->OnUpdateCallBackRechargeOrder(rid, price, transaction_id,
                                                   result, uid, balance);
 
+  //const std::string r_rt =
+   //   "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+  const std::string r_rt = "{\"returncode\":\"SUCCESS\"}";
+  send_full(socket, r_rt.c_str(), r_rt.length());
+
+  if (r) {
+    swp_logic::UserInfo user;
+    schduler_engine_->GetUserInfoSchduler(uid, &user);
+    user.set_balance(balance);
+    pay_logic::net_reply::Balance net_balance;
+    net_balance.set_balance(balance);
+    struct PacketControl packet_control;
+    MAKE_HEAD(packet_control, S_NOTICE_SVC, PAY_TYPE, 0, 0, 0);
+    packet_control.body_ = net_balance.get();
+    send_message(user.socket_fd(), &packet_control);
+
+  }
+  return true;
+}
+
+
+bool PayManager::OnThirdCashServer(const int socket, 
+                            const std::string& mch_id, 
+			    const int64 total_fee,
+                            const std::string& transaction_id,
+			    const int64 status, const std::string& rid)
+			    {
+  int64 uid = 0;
+  double balance = 0.0;
+  double price = ((double) total_fee) / 100;
+
+  bool r = pay_db_->OnUpdateCallBackWithdrawOrder(rid, price, transaction_id,
+                                                  status, uid, balance);
+
   const std::string r_rt =
       "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
   send_full(socket, r_rt.c_str(), r_rt.length());
@@ -441,5 +449,4 @@ bool PayManager::OnThirdServer(const int socket, const std::string& appid,
   }
   return true;
 }
-
 }
