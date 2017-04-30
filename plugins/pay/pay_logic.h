@@ -55,16 +55,18 @@ class Paylogic {
                     struct PacketHead * packet);
 
 
-  bool OnThirdPayOrder(struct server* srv, int socket,
+  bool OnSHFJPayOrder(struct server* srv, int socket,
                     struct PacketHead *packet);
 
-  bool OnThirdCashOrder(struct server* srv, int socket,
-                    struct PacketHead *packet);
-
-  bool OnThirdPayClient(struct server* srv, int socket,
+  bool OnSHFJPayClient(struct server* srv, int socket,
                      struct PacketHead *packet);
 
-  bool OnThirdPaySever(struct server* srv, int socket,
+  bool OnSHFJPaySever(struct server* srv, int socket,
+                    struct PacketHead * packet);
+
+  bool OnSHFJCashOrder(struct server* srv, int socket,
+                    struct PacketHead *packet);
+  bool OnSHFJCashServer(struct server* srv, int socket,
                     struct PacketHead * packet);
  private:
   bool Init();
