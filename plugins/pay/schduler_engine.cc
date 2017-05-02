@@ -90,8 +90,12 @@ bool PayManager::OnSHFJCreateOrder(const int socket, const int64 session,
     send_error(socket, ERROR_TYPE, THIRD_ORDER_ERROR, session);
     return false;
   }
-
-  r = pay_db_->OnCreateRechargeOrder(uid, rid, price, UNIPNPAY);
+  int pay_plat = UNIPNPAY;
+  if (pay_type == "ALIPAY_QRCODE_PAY" || pay_type == "ALIPAY_JSAPI_PAY" )
+    pay_plat = ALIPAY; 
+  else if (pay_type == "WECHAT_QRCODE_PAY" || pay_type == "WECHAT_JSAPI_PAY")
+    pay_plat = WX_APP; 
+  r = pay_db_->OnCreateRechargeOrder(uid, rid, price, pay_plat);
   if (!r) {
     send_error(socket, ERROR_TYPE, STOAGE_ORDER_ERROR, session);
     return r;
