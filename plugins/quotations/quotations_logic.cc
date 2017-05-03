@@ -81,6 +81,8 @@ bool Quotationslogic::OnQuotationsMessage(struct server *srv, const int socket,
     send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
     return false;
   }
+try
+{
 
   if (packet->type == QUOTATIONS_TYPE) {
     switch (packet->operate_code) {
@@ -100,6 +102,12 @@ bool Quotationslogic::OnQuotationsMessage(struct server *srv, const int socket,
         break;
     }
   }
+}
+catch (...)
+{
+    LOG_ERROR2("QUOTATIONS_____________________________Error socket %d, packate type[%d]", socket, packet->type);
+    return false;
+}
   return true; /////////////////
 }
 

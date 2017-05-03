@@ -1052,9 +1052,9 @@ class SHFJPayOrder {
   }
 
   ~SHFJPayOrder() {
-    if (payment_info_) {
-      delete payment_info_;
-      payment_info_= NULL;
+    if (value_) {
+      delete value_;
+      value_ = NULL;
     }
   }
   void set_payment_info(const std::string& payment_info) {
@@ -1072,7 +1072,6 @@ class SHFJPayOrder {
 
  private:
   base_logic::StringValue* payment_info_;
-  //base_logic::StringValue* rid_;  //为兼容暂时使用string
   base_logic::DictionaryValue* value_;
 };
 
@@ -1092,6 +1091,7 @@ class SHFJCashOrder {
   }
 
   ~SHFJCashOrder() {
+/*
     if (merchant_no_) {
       delete merchant_no_;
       merchant_no_= NULL;
@@ -1119,6 +1119,11 @@ class SHFJCashOrder {
     if (status_) {
       delete status_;
       status_= NULL;
+    }
+*/
+    if (value_) {
+      delete value_;
+      value_ = NULL;
     }
   }
   void set_merchant_no(const std::string& merchant_no) {

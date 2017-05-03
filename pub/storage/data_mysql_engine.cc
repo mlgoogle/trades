@@ -14,12 +14,17 @@ void DataMYSQLEngine::Release() {
 bool DataMYSQLEngine::WriteData(const int32 type, base_logic::Value* value) {
   bool r = false;
   std::string sql;
+  if (value == NULL)
+    return false;
   base_logic::DictionaryValue* dict = (base_logic::DictionaryValue*) (value);
+  if (dict == NULL)
+    return false;
   r = dict->GetString(L"sql", &sql);
   if (!r) {
     LOG_ERROR("WriteData sql error");
     return r;
   }
+  LOG_DEBUG2("sql == [%s]_________", sql.c_str());
   base_storage::DBStorageEngine* engine = db_pool_.DBConnectionPop();
   if (engine == NULL) {
     LOG_ERROR("GetConnection Error");
@@ -39,11 +44,22 @@ bool DataMYSQLEngine::WriteData(const int32 type, base_logic::Value* value) {
 
 bool DataMYSQLEngine::ReadData(const int32 type, base_logic::Value* value,
                                void (*storage_get)(void*, base_logic::Value*)) {
+  if (value == NULL)
+  {
+    LOG_ERROR("error[value is NULL]");
+    return false;
+  }
+
   bool r = false;
   base_storage::DBStorageEngine* engine = db_pool_.DBConnectionPop();
   do {
     std::string sql;
     base_logic::DictionaryValue* dict = (base_logic::DictionaryValue*) (value);
+    if (dict == NULL){
+      LOG_ERROR("dict == NULL error");
+      r = false;
+      break;
+    } 
     r = dict->GetString(L"sql", &sql);
     if (!r) {
       LOG_ERROR("ReadData sql error");
@@ -70,7 +86,8 @@ bool DataMYSQLEngine::ReadData(const int32 type, base_logic::Value* value,
       storage_get(reinterpret_cast<void*>(engine), value);
     }
   } while (0);
-  db_pool_.DBConnectionPush(engine);
+  if (engine != NULL)
+    db_pool_.DBConnectionPush(engine);
   return r;
 }
 
