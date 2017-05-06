@@ -237,9 +237,10 @@ bool SHFJPayOrder::set_http_packet(base_logic::DictionaryValue* value) {
     set_out_trade_no(temp);
   //else
     //return false;
-  r = value->GetString(L"content", &temp);
-  if (r)
-    set_content(temp);
+  //r = value->GetString(L"content", &temp);
+  //if (r)
+  temp = "航空润滑油"; 
+  set_content(temp);
 
   return true;
 }
