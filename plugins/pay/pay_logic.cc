@@ -348,12 +348,12 @@ bool Paylogic::OnSHFJPaySever(struct server* srv, int socket,
     if (shfj_pay_sever.status() == "PAYED_FAILED"
        || shfj_pay_sever.status() == "SETTLED_FAILED" )
     {
-      result = 2;
+      result = 2; //失败
       return false;
     }
     else if (shfj_pay_sever.status() != "PAYED"
     	&& shfj_pay_sever.status() != "SETTLED")
-	result = 3;
+	result = 3; //
 
     pay_logic::PayEngine::GetSchdulerManager()->OnSHFJServer(
         socket, shfj_pay_sever.pay_type(), shfj_pay_sever.mch_id(),

@@ -47,12 +47,14 @@ bool PayManager::OnSHFJCreateCashOrder(const int socket, const int64 session,
   //创建取现订单号
   pay_logic::SHFJOrder shfj_order;
   int64 rid = base::SysRadom::GetInstance()->GetRandomID();
-
+try
+{
   bool r = SHFJCashOrder(socket, rid, price, rec_bank_name, rec_bra_bank_name, rec_card_no, rec_account_name,shfj_order, r_shfj_cash_order);
   if (!r) {
     send_error(socket, ERROR_TYPE, THIRD_CASH_ORDER_ERROR, session);
     return false;
   }
+
 //数据库操作创建取现订单记录
 //
   int status = pay_logic::GetSHFJCashStatus(r_shfj_cash_order.status());  //
@@ -62,6 +64,11 @@ bool PayManager::OnSHFJCreateCashOrder(const int socket, const int64 session,
     send_error(socket, ERROR_TYPE, STOAGE_ORDER_ERROR, session);
     return r;
   }
+}
+catch (...)
+{
+  LOG_DEBUG2("CreateCashOrder:exception uid[%d]", uid);
+}
 //返回处理
   struct PacketControl packet_control;
 
@@ -90,8 +97,12 @@ bool PayManager::OnSHFJCreateOrder(const int socket, const int64 session,
     send_error(socket, ERROR_TYPE, THIRD_ORDER_ERROR, session);
     return false;
   }
-
-  r = pay_db_->OnCreateRechargeOrder(uid, rid, price, UNIPNPAY);
+  int pay_plat = UNIPNPAY;
+  if (pay_type == "ALIPAY_QRCODE_PAY" || pay_type == "ALIPAY_JSAPI_PAY" )
+    pay_plat = ALIPAY; 
+  else if (pay_type == "WECHAT_QRCODE_PAY" || pay_type == "WECHAT_JSAPI_PAY")
+    pay_plat = WX_APP; 
+  r = pay_db_->OnCreateRechargeOrder(uid, rid, price, pay_plat);
   if (!r) {
     send_error(socket, ERROR_TYPE, STOAGE_ORDER_ERROR, session);
     return r;
@@ -109,6 +120,8 @@ bool PayManager::OnSHFJCreateOrder(const int socket, const int64 session,
 
 bool PayManager::ParserSHFJOrderResult(std::string& result,
                                      std::string& prepay_id) {
+  if (result.length() < 1)
+    return false;
   base_logic::ValueSerializer* deserializer =
       base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &result);
   std::string err_str;
@@ -129,6 +142,8 @@ bool PayManager::ParserSHFJOrderResult(std::string& result,
 }
 
 bool PayManager::ParserSHFJCashOrderResult(std::string& result, pay_logic::net_reply::SHFJCashOrder &t_shfj_cash_order) {
+  if (result.length() < 1)
+    return false;
   base_logic::ValueSerializer* deserializer =
       base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &result);
   std::string err_str;

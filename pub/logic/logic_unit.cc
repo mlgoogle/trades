@@ -289,6 +289,7 @@ bool BaseValue::GetBigInteger(base_logic::DictionaryValue* dict_value,
   return r;
 }
 
+/*
 SendUtils *SendUtils::instance_ = NULL;
 
 SendUtils::SendUtils() {
@@ -307,10 +308,14 @@ SendUtils *SendUtils::GetInstance() {
 void SendUtils::FreeInstance() {
   delete instance_;
   instance_ = NULL;
-}
+}*/
+
+struct threadrw_t* SendUtils::socket_lock_ = NULL;
 
 int32 SendUtils::SendFull(int socket, const char *buffer, size_t nbytes) {
-  base_logic::WLockGd lk(socket_lock_);
+  if (NULL == SendUtils::socket_lock_)
+     InitThreadrw(&SendUtils::socket_lock_);
+  base_logic::WLockGd lk(SendUtils::socket_lock_);
   ssize_t amt = 0;
   ssize_t total = 0;
   const char *buf = buffer;

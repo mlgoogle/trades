@@ -212,7 +212,8 @@ bool UsersDB::AccountBalance(const int64 uid, double & balance) {
   base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
   base_logic::DictionaryValue *info_value = NULL;
   std::string sql;
-
+try
+{
 //call actuals.proc_AccountBalance(68)
   sql = "call proc_AccountBalance("
       + base::BasicUtil::StringUtil::Int64ToString(uid) + ");";
@@ -227,6 +228,12 @@ bool UsersDB::AccountBalance(const int64 uid, double & balance) {
   dict->GetDictionary(L"resultvalue", &info_value);
 
   r = info_value->GetReal(L"balance", &balance);
+}
+catch (...)
+{
+    LOG_ERROR("UsersDB::AccountBalance Error!!!" );
+    r = false;
+}
   if (dict) {
     delete dict;
     dict = NULL;
@@ -283,6 +290,8 @@ void UsersDB::CallRegisterAccount(void* param, base_logic::Value* value) {
 }
 
 void UsersDB::CallAccountBalance(void* param, base_logic::Value* value) {
+try
+{
   base_logic::DictionaryValue *dict = (base_logic::DictionaryValue *) (value);
   base_storage::DBStorageEngine *engine =
       (base_storage::DBStorageEngine *) (param);
@@ -296,6 +305,11 @@ void UsersDB::CallAccountBalance(void* param, base_logic::Value* value) {
     }
   }
   dict->Set(L"resultvalue", (base_logic::Value *) (info_value));
+}
+catch (...)
+{
+    LOG_ERROR("CallAccount Balance Error!!!" );
+}
 }
 
 void UsersDB::CallCheckAccountExist(void* param, base_logic::Value* value) {

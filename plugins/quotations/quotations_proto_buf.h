@@ -230,18 +230,10 @@ class Login {
   }
 
   ~Login() {
-    if (aid_) {
-      delete aid_;
-      aid_ = NULL;
-    }
-    if (password_) {
-      delete password_;
-      password_ = NULL;
-    }
 
-    if (atype_) {
-      delete atype_;
-      atype_ = NULL;
+    if (value_) {
+      delete value_;
+      value_ = NULL;
     }
   }
 

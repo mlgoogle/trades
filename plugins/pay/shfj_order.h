@@ -12,13 +12,15 @@ const std::string T_MCH_ID = "MNYH54001EBOM"; //商户号
 const std::string T_APP_KEY = "2017042116284843001"; //证书编号
 const std::string T_MD5_KEY = "RPOUDPWHNMJETKCJADHFYQBEMJRVDVHP"; //证书编号
 
-const std::string THIRD_URL = "http://119.23.114.137/native/";
-const std::string THIRD_CASH_URL = "http://119.23.114.137/native/";
+//const std::string THIRD_URL = "http://119.23.114.137/native/";
+//const std::string THIRD_CASH_URL = "http://119.23.114.137/native/";
+const std::string THIRD_URL = "https://gw.xzlpay.com/native/";
+const std::string THIRD_CASH_URL = "https://gw.xzlpay.com/native/";
 
 const std::string T_NOTIFY_URL =
-    "http://139.224.34.22/cgi-bin/flight/pay/v1/third_callback.fcgi";
+    "http://122.144.169.217/cgi-bin/flight/pay/v1/third_callback.fcgi";
 const std::string T_CASH_NOTIFY_URL =
-    "http://139.224.34.22/cgi-bin/flight/pay/v1/third_cash_callback.fcgi";
+    "http://122.144.169.217/cgi-bin/flight/pay/v1/third_cash_callback.fcgi";
 
 /*
  */

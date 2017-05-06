@@ -17,8 +17,7 @@
 #include "share/data_share_mgr.h"
 
 namespace logic {
-
-class SendUtils {
+/*class SendUtils {
  public:
   SendUtils();
   virtual ~SendUtils();
@@ -36,7 +35,7 @@ class SendUtils {
                    int32 line);
  private:
   struct threadrw_t* socket_lock_;
-};
+};*/
 
 class BaseValue {
  public:
@@ -156,13 +155,38 @@ class SomeUtils {
 };
 
 extern std::map<int, const char*> error_code_msgs;
+
+
+class SendUtils {
+ public:
+   static int32 SendFull(int socket, const char* buffer, size_t bytes);
+       
+   static bool SendBytes(int socket, const void* bytes, int32 len,
+                         const char* file, int32 line);
+   
+   static bool SendMessage(int socket, struct PacketHead* packet,
+                           const char* file, int32 line);
+       
+   static bool SendHeadMessage(int socket, int32 operate_code, int32 type,
+                               int32 is_zip_encrypt, int64 session,
+                               int32 reserved, const char* file, int32 line);
+        
+   static bool SendErronMessage(int socket, int32 operate_code, int32 type,
+                                int32 is_zip_encrypt, int64 session,
+                                int32 reserved, int32 error, const char* file,
+                                int32 line);
+     
+  static struct threadrw_t* socket_lock_;
+};
+
 }
 
 #define send_message(socket, packet) \
-  logic::SendUtils::GetInstance()->SendMessage(socket, packet, __FILE__, __LINE__)\
+  logic::SendUtils::SendMessage(socket, packet, __FILE__, __LINE__)
 
 #define send_full(socket, buffer, len) \
-  logic::SendUtils::GetInstance()->SendFull(socket, buffer, len)\
+  logic::SendUtils::SendBytes(socket, buffer, len, __FILE__, __LINE__)
+
 
 #define send_error(socket, type, error_code, session) \
   do { \

@@ -54,6 +54,10 @@ class UserAccount {
       delete uid_;
       uid_ = NULL;
     }
+    if (token_) {
+      delete token_;
+      token_ = NULL;
+    }
   }
 
   bool set_http_packet(base_logic::DictionaryValue* value);
@@ -642,10 +646,12 @@ class UserInfo {
   }
 
   ~UserInfo() {
-    /*if (value_){
+/*
+    if (value_){
      delete value_;
      value_ = NULL;
-     }*/
+    }   
+*/
   }
 
   void set_uid(const int64 uid) {
@@ -733,6 +739,7 @@ class LoginAccount {
   }
 
   ~LoginAccount() {
+
     if (value_) {
       delete value_;
       value_ = NULL;
@@ -771,6 +778,7 @@ class RegisterAccount {
   }
 
   ~RegisterAccount() {
+
     if (value_) {
       delete value_;
       value_ = NULL;
@@ -809,6 +817,7 @@ class RegisterVerfiycode {
    }
 
    ~RegisterVerfiycode() {
+
      if (value_) {
        delete value_;
        value_ = NULL;
