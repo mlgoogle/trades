@@ -432,7 +432,7 @@ bool Userslogic::OnRegisterVerifycode(struct server* srv, int socket,
   std::stringstream ss;
   ss << SHELL_SMS << " " << phone << " "
       <<rand_code<<" "
-      << 1;
+      << 0;
   /*std::string sysc = shell_sms + " " + phone + " " +
       base::BasicUtil::StringUtil::Int64ToString(rand_code) + " " +
       base::BasicUtil::StringUtil::Int64ToString(1);*/
