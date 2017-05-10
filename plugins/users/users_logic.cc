@@ -128,6 +128,8 @@ try
 catch (...)
 {
     LOG_DEBUG2("catch...... packet_length %d",packet->packet_length);
+    LOG_DEBUG2("catch...... packet_length %d",packet->packet_length);
+    LOG_DEBUG2("catch...... packet_length %d",packet->packet_length);
 }
   return true;
 }
@@ -420,11 +422,14 @@ bool Userslogic::OnRegisterVerifycode(struct server* srv, int socket,
 
   ////检测号码是否已经注册
   std::string phone = register_vercode.phone();
+  if (register_vercode.type() == 0) //注册
+  {
   r =user_db_->CheckAccountExist(phone);
   if (!r) {
     LOG_DEBUG2("packet_length %d",packet->packet_length);
     send_error(socket, ERROR_TYPE, NO_USER_EXIST_REGISTER, packet->session_id);
     return false;
+  }
   }
 
   int64 rand_code = 100000 + rand() % (999999 - 100000 + 1);
@@ -432,7 +437,7 @@ bool Userslogic::OnRegisterVerifycode(struct server* srv, int socket,
   std::stringstream ss;
   ss << SHELL_SMS << " " << phone << " "
       <<rand_code<<" "
-      << 0;
+      << 0; //0注册 1登陆 目前脚本中只有为0时的模板是启用的
   /*std::string sysc = shell_sms + " " + phone + " " +
       base::BasicUtil::StringUtil::Int64ToString(rand_code) + " " +
       base::BasicUtil::StringUtil::Int64ToString(1);*/

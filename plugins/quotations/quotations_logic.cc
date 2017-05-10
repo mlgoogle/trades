@@ -105,7 +105,9 @@ try
 }
 catch (...)
 {
-    LOG_ERROR2("QUOTATIONS_____________________________Error socket %d, packate type[%d]", socket, packet->type);
+    LOG_ERROR2("catch _____________________________Error socket %d, packate type[%d]", socket, packet->type);
+    LOG_ERROR2("catch _____________________________Error socket %d, packate type[%d]", socket, packet->type);
+    LOG_ERROR2("catch _____________________________Error socket %d, packate type[%d]", socket, packet->type);
     return false;
 }
   return true; /////////////////

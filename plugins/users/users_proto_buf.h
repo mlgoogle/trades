@@ -24,10 +24,23 @@ class RegisterVerfiycode {
     if (phone_) {
       delete phone_;
     }
+    if (type_) {
+      delete type_;
+    }
   }
 
   void set_phone(const std::string& phone) {
     phone_ = new base_logic::StringValue(phone);
+  }
+
+  void set_type(const int32 type) {
+    type_ = new base_logic::FundamentalValue(type);
+  }
+
+  int32 type() const {
+    int64 type;
+    type_->GetAsBigInteger(&type);
+    return type;
   }
 
   const std::string& phone() const {
@@ -40,6 +53,7 @@ class RegisterVerfiycode {
 
  private:
   base_logic::StringValue* phone_;
+  base_logic::FundamentalValue* type_;
 };
 
 class UserAccount {

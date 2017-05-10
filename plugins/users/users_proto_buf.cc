@@ -27,6 +27,12 @@ bool RegisterVerfiycode::set_http_packet(base_logic::DictionaryValue* value) {
     set_phone (phone);
   else
     return false;
+  int64 temp = 0;
+  r = value->GetBigInteger(L"type", &temp);
+  if (r)
+    set_type(temp);
+  else
+    set_type(0);
 
   return true;
 }
