@@ -99,6 +99,10 @@ try
       OnLoginAccount(srv, socket, packet);
       break;
     }
+    case R_MODIFY_PASSWORD: {
+      OnModifyPassWord(srv, socket, packet);
+      break;
+    }
     case R_ACCOUNT_ASSET: {
       OnUserAccount(srv, socket, packet);
       break;
@@ -297,6 +301,71 @@ bool Userslogic::OnUserAccount(struct server* srv, int socket,
   return true;
 }
 
+bool Userslogic::OnModifyPassWord(struct server* srv, int socket,
+                                struct PacketHead *packet) {
+  users_logic::net_request::ModifyPwd modifypwd;
+  if (packet->packet_length <= PACKET_HEAD_LENGTH) {
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
+    return false;
+  }
+  struct PacketControl* packet_control = (struct PacketControl*) (packet);
+  bool r = modifypwd.set_http_packet(packet_control->body_);
+  if (!r) {
+    LOG_DEBUG2("packet_length %d",packet->packet_length);
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
+    return false;
+  }
+  
+
+  std::string v_token = SMS_KEY + base::BasicUtil::StringUtil::Int64ToString(modifypwd.timestamp()) +
+      modifypwd.vcode().c_str() + modifypwd.phone();
+  base::MD5Sum md5(v_token.c_str());
+  std::string token = md5.GetHash();
+  
+  users_logic::net_reply::ModifyPwd net_modifypwd;
+  int status = 1; //0 sucess ,1 failed
+  //LOG_DEBUG2("v_token[%s]token[%s]vtoken[%s]", v_token.c_str(), token.c_str(),modifypwd.vtoken().c_str());
+  if (!strcmp(token.c_str(), modifypwd.vtoken().c_str())) //验证token
+  {  
+    //LOG_DEBUG2("phone[%s]token[%s]vtoken[%s]___________________", modifypwd.phone().c_str(), token.c_str(),modifypwd.vtoken().c_str());
+    //LOG_DEBUG2("pwd[%s]___________________", modifypwd.pwd().c_str());
+    std::string phone = modifypwd.phone() ;
+    std::string pwd = modifypwd.pwd() ;
+    r = user_db_->ModifyPwd(phone, pwd);
+    if (r) status = 0;
+  }
+
+  net_modifypwd.set_status(status);
+  struct PacketControl net_packet_control;
+  MAKE_HEAD(net_packet_control, S_MODIFY_PASSWORD, USERS_TYPE, 0,
+            packet->session_id, 0);
+  net_packet_control.body_ = net_modifypwd.get();
+  send_message(socket, &net_packet_control);
+
+
+/*
+  std::string ip;
+  int port;
+  logic::SomeUtils::GetIPAddress(socket, ip, port);
+
+  swp_logic::UserInfo userinfo;
+  r = user_db_->LoginAccount(login_account.phone_num(), login_account.passwd(),
+                             login_account.device_id(), ip, userinfo);
+  if (!r || userinfo.uid() == 0) {
+    send_error(socket, ERROR_TYPE, NO_PASSWORD_ERRNOR, packet->session_id);
+    return false;
+  }
+
+  //token 计算
+  std::string token;
+  logic::SomeUtils::CreateToken(userinfo.uid(), login_account.passwd(), &token);
+  userinfo.set_token(token);
+  //发送用信息
+  SendUserInfo(socket, packet->session_id, S_ACCOUNT_LOGIN, userinfo);
+*/
+  return true;
+}
+
 bool Userslogic::OnLoginAccount(struct server* srv, int socket,
                                 struct PacketHead *packet) {
   users_logic::net_request::LoginAccount login_account;
@@ -332,7 +401,6 @@ bool Userslogic::OnLoginAccount(struct server* srv, int socket,
   SendUserInfo(socket, packet->session_id, S_ACCOUNT_LOGIN, userinfo);
   return true;
 }
-
 
 bool Userslogic::OnLoginWiXin(struct server* srv, int socket,
                                 struct PacketHead *packet) {

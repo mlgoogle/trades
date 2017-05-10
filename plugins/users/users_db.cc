@@ -206,6 +206,48 @@ bool UsersDB::LoginWiXin(const std::string& open_id,
   return r;
 }
 
+bool UsersDB::ModifyPwd(const std::string &phone, const std::string &newpwd)
+{
+
+  bool r = false;
+  base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
+  base_logic::DictionaryValue *info_value = NULL;
+  std::string sql;
+try
+{
+  sql = "call proc_ModifyPwd('" + phone + "','" + newpwd + "');";
+  //LOG_ERROR2("______________sql= %s, !!", sql.c_str());
+
+  base_logic::ListValue *listvalue;
+  dict->SetString(L"sql", sql);
+  r = mysql_engine_->ReadData(0, (base_logic::Value *) (dict),
+                              CallRegisterAccount);
+  if (!r)
+    return false;
+
+  dict->GetDictionary(L"resultvalue", &info_value);
+  int64 ruid = 0;
+  int result = 0;
+  r = info_value->GetBigInteger(L"uid", &ruid);
+  r = info_value->GetInteger(L"result", &result);
+  r = (r && ruid > 0) ? true : false;
+
+  //LOG_ERROR2("______________result = %d, uid = %d!!!", result, ruid );
+  //LOG_ERROR2("______________result = %d, uid = %d!!!", result, ruid );
+  //r = info_value->GetReal(L"balance", &balance);
+}
+catch (...)
+{
+    LOG_ERROR("UsersDB::ModifyPwd Error!!!" );
+    r = false;
+}
+  if (dict) {
+    delete dict;
+    dict = NULL;
+  }
+  return r;
+
+}
 
 bool UsersDB::AccountBalance(const int64 uid, double & balance) {
   bool r = false;

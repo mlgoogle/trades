@@ -64,6 +64,8 @@ class Userslogic {
 
   bool OnRegisterVerifycode(struct server* srv, int socket,
                             struct PacketHead *packet);
+  bool OnModifyPassWord(struct server* srv, int socket,
+                      struct PacketHead *packet);
 
   bool SendUserInfo(const int socket, const int64 session, const int32 opcode,
                     swp_logic::UserInfo& userinfo);

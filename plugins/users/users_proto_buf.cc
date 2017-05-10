@@ -291,6 +291,56 @@ bool WXBindAccount::set_http_packet(base_logic::DictionaryValue* value) {
   return true;
 }
 
+bool ModifyPwd::set_http_packet(base_logic::DictionaryValue* value) {
+  std::string tmp;
+  bool r = false;
 
+  if (value == NULL)
+    return false;
+
+  r = value->GetString(L"phone", &tmp);
+  if (r) 
+    set_phone (tmp);
+  else
+    return false;
+
+  r = value->GetString(L"vCode", &tmp);
+  if (r) 
+    set_vcode (tmp);
+  else
+    return false;
+
+  r = value->GetString(L"vToken", &tmp);
+  if (r) 
+    set_vtoken (tmp);
+  else
+    return false;
+
+  r = value->GetString(L"pwd", &tmp);
+  if (r) 
+    set_pwd (tmp);
+  else
+    return false;
+
+  int64 temp = 0;
+  r = value->GetBigInteger(L"type", &temp);
+  if (r) 
+    set_type(temp);
+  else
+    return false;
+
+  r = value->GetBigInteger(L"id", &temp);
+  if (r) 
+    set_uid(temp);
+  else
+    return false;
+  r = value->GetBigInteger(L"timestamp", &temp);
+  if (r) 
+    set_timestamp(temp);
+  else
+    return false;
+
+  return true;
+}
 }
 }

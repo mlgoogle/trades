@@ -17,7 +17,7 @@ namespace net_request {
 class RegisterVerfiycode {
  public:
   RegisterVerfiycode()
-      : phone_(NULL) {
+      : phone_(NULL), type_(NULL) {
   }
 
   ~RegisterVerfiycode() {
@@ -608,6 +608,125 @@ class WXBindAccount {
   base_logic::StringValue* device_id_;
 };
 
+class ModifyPwd {
+ public:
+  ModifyPwd()
+      : phone_(NULL),vcode_(NULL),
+      vtoken_(NULL),pwd_(NULL),
+      type_(NULL),timestamp_(NULL),
+      uid_(NULL)
+      {
+  }
+
+  ~ModifyPwd() {
+    if (phone_) {
+      delete phone_;
+    }
+    if (vcode_) {
+      delete vcode_;
+    }
+    if (vtoken_) {
+      delete vtoken_;
+    }
+    if (pwd_) {
+      delete pwd_;
+    }
+
+    if (type_) {
+      delete type_;
+    }
+
+    if (timestamp_) {
+      delete timestamp_;
+    }
+
+    if (uid_) {
+      delete uid_;
+    }
+  }
+
+  void set_phone(const std::string& phone) {
+    phone_ = new base_logic::StringValue(phone);
+  }
+
+  void set_vcode(const std::string& value) {
+    vcode_ = new base_logic::StringValue(value);
+  }
+
+  void set_vtoken(const std::string& value) {
+    vtoken_ = new base_logic::StringValue(value);
+  }
+
+  void set_pwd(const std::string& value) {
+    pwd_ = new base_logic::StringValue(value);
+  }
+
+  void set_type(const int32 type) {
+    type_ = new base_logic::FundamentalValue(type);
+  }
+
+  void set_uid(const int64 value) {
+    uid_ = new base_logic::FundamentalValue(value);
+  }
+
+  void set_timestamp(const int64 value) {
+    timestamp_ = new base_logic::FundamentalValue(value);
+  }
+
+  int32 type() const {
+    int64 type;
+    type_->GetAsBigInteger(&type);
+    return type;
+  }
+
+  int64 uid() const {
+    int64 uid;
+    uid_->GetAsBigInteger(&uid);
+    return uid;
+  }
+
+  int64 timestamp() const {
+    int64 timestamp;
+    timestamp_->GetAsBigInteger(&timestamp);
+    return timestamp;
+  }
+
+  const std::string& phone() const {
+    std::string phone;
+    phone_->GetAsString(&phone);
+    return phone;
+  }
+
+  const std::string& vcode() const {
+    std::string vcode;
+    vcode_->GetAsString(&vcode);
+    return vcode;
+  }
+
+  const std::string& vtoken() const {
+    std::string vtoken;
+    vtoken_->GetAsString(&vtoken);
+    return vtoken;
+  }
+
+  const std::string& pwd() const {
+    std::string pwd;
+    pwd_->GetAsString(&pwd);
+    return pwd;
+  }
+
+  bool set_http_packet(base_logic::DictionaryValue* value);
+
+ private:
+  base_logic::StringValue* phone_;
+  base_logic::StringValue* vcode_;
+  base_logic::StringValue* vtoken_;
+  base_logic::StringValue* pwd_;
+  base_logic::FundamentalValue* uid_;    //用户id
+  base_logic::FundamentalValue* type_;   //0：登录密码 1：交易密码，提现密码
+  base_logic::FundamentalValue* timestamp_;   //时间戳
+};
+
 typedef UserAccount CheckToken;
 
 }
@@ -857,6 +976,40 @@ class RegisterVerfiycode {
  private:
   base_logic::FundamentalValue* code_time_;
   base_logic::StringValue* token_;
+  base_logic::DictionaryValue* value_;
+};
+
+
+class ModifyPwd{
+ public:
+  ModifyPwd()
+       : status_(NULL),
+         value_(NULL) {
+   }
+
+   ~ModifyPwd() {
+
+     if (value_) {
+       delete value_;
+       value_ = NULL;
+     }
+   }
+
+   void set_status(const int64 status) {
+     status_ = new base_logic::FundamentalValue(status);
+   }
+
+ public:
+  base_logic::DictionaryValue* get() {
+    value_ = new base_logic::DictionaryValue();
+    if (status_ != NULL)
+      value_->Set(L"status", status_);
+
+    return value_;
+  }
+ private:
+  base_logic::FundamentalValue* status_;
+  //base_logic::StringValue* token_;
   base_logic::DictionaryValue* value_;
 };
 }

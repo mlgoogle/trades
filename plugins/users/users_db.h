@@ -39,6 +39,8 @@ class UsersDB {
 
   bool AccountBalance(const int64 uid, double & balance);
 
+  bool ModifyPwd(const std::string &phone, const std::string &newpwd);
+
   bool GetUserInfo(const int64 uid, const std::string& ip,
                    swp_logic::UserInfo& userinfo);
 
