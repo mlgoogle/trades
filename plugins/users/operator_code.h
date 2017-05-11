@@ -32,6 +32,9 @@ namespace users_logic {
 #define S_WX_LOGIN USERS_TYPE * 1000 + 14
 #define R_WX_BIND_ACCOUNT USERS_TYPE * 1000 + 15
 #define S_WX_BIND_ACCOUNT USERS_TYPE * 1000 + 16
+//
+#define R_GET_VERSION USERS_TYPE * 1000 + 17
+#define S_GET_VERSION USERS_TYPE * 1000 + 18
 
 }
 

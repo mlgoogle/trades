@@ -38,6 +38,26 @@ bool RegisterVerfiycode::set_http_packet(base_logic::DictionaryValue* value) {
 }
 
 
+bool TGetVersion::set_http_packet(base_logic::DictionaryValue* value) {
+  bool r = false;
+  
+  if (value == NULL)
+    return false;
+
+  int64 temp = 0;
+  std::string str_type;
+  r = value->GetBigInteger(L"ttype", &temp);
+  if (r)
+    set_type(temp);
+  else
+    set_type(0);
+
+  r = value->GetString(L"ttype", &str_type);
+  if (r && str_type == "1")
+    set_type(1);
+
+  return true;
+}
 
 bool RegisterAccount::set_http_packet(base_logic::DictionaryValue* value) {
   int32 err = 0;

@@ -12,6 +12,7 @@
 #include "basic/basictypes.h"
 #include "logic/base_values.h"
 #include "basic/scoped_ptr.h"
+#include "users/users_proto_buf.h"
 
 namespace users_logic {
 
@@ -41,11 +42,15 @@ class UsersDB {
 
   bool ModifyPwd(const std::string &phone, const std::string &newpwd);
 
+  bool GetVersion(const int32 type, users_logic::net_reply::TGetVersion &get_version);
+
   bool GetUserInfo(const int64 uid, const std::string& ip,
                    swp_logic::UserInfo& userinfo);
 
  public:
   static void CallRegisterAccount(void* param, base_logic::Value* value);
+
+  static void CallGetVersion(void* param, base_logic::Value* value);
 
   static void CallLoginAccount(void* param, base_logic::Value* value);
 

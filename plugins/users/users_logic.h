@@ -70,6 +70,8 @@ class Userslogic {
   bool SendUserInfo(const int socket, const int64 session, const int32 opcode,
                     swp_logic::UserInfo& userinfo);
 
+  bool OnGetVersion(struct server* srv, int socket,
+                      struct PacketHead *packet);
  private:
   bool Init();
  private:

@@ -17,6 +17,7 @@
 #include <sstream>
 
 #define DEFAULT_CONFIG_PATH "./plugins/users/users_config.xml"
+#define TIME_HEARTBEAT_TASK 30000
 
 namespace users_logic {
 
@@ -124,6 +125,10 @@ try
       OnWXBindAccount(srv, socket, packet);
       break;
     }
+    case R_GET_VERSION:{
+      OnGetVersion(srv, socket, packet);
+      break;
+    }
     default:
       break;
   }
@@ -160,12 +165,18 @@ bool Userslogic::OnBroadcastClose(struct server *srv, const int socket) {
 
 bool Userslogic::OnIniTimer(struct server *srv) {
   if (srv->add_time_task != NULL) {
+    //srv->add_time_task(srv, "users", TIME_HEARTBEAT_TASK, 30, -1);
   }
   return true;
 }
 
 bool Userslogic::OnTimeout(struct server *srv, char *id, int opcode, int time) {
   switch (opcode) {
+    case TIME_HEARTBEAT_TASK: {
+      //LOG_DEBUG2("pwd[%s]___________________id[%s]______________", id, id);
+      break;
+    }
+
     default:
       break;
   }
@@ -558,4 +569,42 @@ bool Userslogic::SendUserInfo(const int socket, const int64 session,
   send_message(socket, &net_packet_control);
   return true;
 }
+
+
+bool Userslogic::OnGetVersion(struct server* srv, int socket,
+                                struct PacketHead *packet) {
+  users_logic::net_request::TGetVersion get_version;
+  if (packet->packet_length <= PACKET_HEAD_LENGTH) {
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
+    return false;
+  }
+  struct PacketControl* packet_control = (struct PacketControl*) (packet);
+  bool r = get_version.set_http_packet(packet_control->body_);
+  if (!r) {
+    LOG_DEBUG2("packet_length %d",packet->packet_length);
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
+    return false;
+  }
+/*
+  std::string ip;
+  int port;
+  logic::SomeUtils::GetIPAddress(socket, ip, port);
+
+  swp_logic::UserInfo userinfo;
+*/
+  users_logic::net_reply::TGetVersion net_get_version;
+  r = user_db_->GetVersion(get_version.type(), net_get_version);
+  if (!r) {
+    send_error(socket, ERROR_TYPE, NO_VERSION_INFO, packet->session_id);
+    return false;
+  }
+
+  struct PacketControl net_packet_control;
+  MAKE_HEAD(net_packet_control, S_GET_VERSION, 1, 0, packet->session_id, 0);
+  net_packet_control.body_ = net_get_version.get();
+  send_message(socket, &net_packet_control);
+
+  return true;
+}
+
 }  // namespace trades_logic
