@@ -96,7 +96,8 @@ bool Historylogic::OnHistoryMessage(struct server *srv, const int socket,
     send_error(socket, ERROR_TYPE, ERROR_TYPE, FORMAT_ERRNO);
     return false;
   }
-
+try
+{
   switch (packet->operate_code) {
     case R_HISTORY_TRADES: {
       OnHistoryTrades(srv, socket, packet);
@@ -129,6 +130,13 @@ bool Historylogic::OnHistoryMessage(struct server *srv, const int socket,
     default:
       break;
   }
+}
+catch (...)
+{
+    LOG_DEBUG2("catch...... packet_length %d",packet->packet_length);
+    LOG_DEBUG2("catch...... packet_length %d",packet->packet_length);
+    LOG_DEBUG2("catch...... packet_length %d",packet->packet_length);
+}
   return true;
 }
 

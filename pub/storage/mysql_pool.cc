@@ -65,6 +65,8 @@ void MYSQL_Pool::DBConnectionPush(base_storage::DBStorageEngine* engine) {
 }
 
 base_storage::DBStorageEngine* MYSQL_Pool::DBConnectionPop() {
+try
+{
   if (db_conn_pool_.size() <= 0)
     return NULL;
   base_logic::WLockGd lk(db_pool_lock_);
@@ -89,6 +91,12 @@ base_storage::DBStorageEngine* MYSQL_Pool::DBConnectionPop() {
     } while (reconnect > 0);
   }
   return engine;
+}
+catch (...)
+{
+  LOG_ERROR("catch ... DBConnection Pop");
+  return NULL;
+}
 }
 
 

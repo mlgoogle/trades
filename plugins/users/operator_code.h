@@ -16,6 +16,9 @@ namespace users_logic {
 #define R_ACCOUNT_LOGIN  USERS_TYPE * 1000 + 3
 #define S_ACCOUNT_LOGIN  USERS_TYPE * 1000 + 4
 
+#define R_MODIFY_PASSWORD USERS_TYPE * 1000 + 5
+#define S_MODIFY_PASSWORD USERS_TYPE * 1000 + 6
+
 #define R_ACCOUNT_ASSET   USERS_TYPE * 1000 + 7
 #define S_ACCOUNT_ASSET   USERS_TYPE * 1000 + 8
 
@@ -29,6 +32,9 @@ namespace users_logic {
 #define S_WX_LOGIN USERS_TYPE * 1000 + 14
 #define R_WX_BIND_ACCOUNT USERS_TYPE * 1000 + 15
 #define S_WX_BIND_ACCOUNT USERS_TYPE * 1000 + 16
+//
+#define R_GET_VERSION USERS_TYPE * 1000 + 17
+#define S_GET_VERSION USERS_TYPE * 1000 + 18
 
 }
 

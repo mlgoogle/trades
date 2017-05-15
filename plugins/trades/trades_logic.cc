@@ -144,7 +144,8 @@ bool Tradeslogic::OnTradesMessage(struct server *srv, const int socket,
     LOG_ERROR2("UnpackStream Error socket %d", socket);
     return false;
   }
-
+try
+{
   switch (packet->operate_code) {
     case R_TRADES_GOODS_DATA: {
       OnPlatformsGoods(srv, socket, packet);
@@ -167,6 +168,13 @@ bool Tradeslogic::OnTradesMessage(struct server *srv, const int socket,
     default:
       break;
   }
+}
+catch (...)
+{
+    LOG_ERROR2("catch _____________________________Error socket %d, packate type[%d]", socket, packet->type);
+    LOG_ERROR2("catch _____________________________Error socket %d, packate type[%d]", socket, packet->type);
+    LOG_ERROR2("catch _____________________________Error socket %d, packate type[%d]", socket, packet->type);
+}
   return true;
 }
 

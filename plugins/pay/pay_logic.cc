@@ -132,10 +132,10 @@ try
 }
 catch (...)
 {
-    LOG_ERROR2("operator_code[%d]__________________________________________________", packet->operate_code);
-    LOG_ERROR2("operator_code[%d]__________________________________________________", packet->operate_code);
-    LOG_ERROR2("operator_code[%d]__________________________________________________", packet->operate_code);
-    LOG_ERROR2("operator_code[%d]__________________________________________________", packet->operate_code);
+    LOG_ERROR2("catch operator_code[%d]__________________________________________________", packet->operate_code);
+    LOG_ERROR2("catch operator_code[%d]__________________________________________________", packet->operate_code);
+    LOG_ERROR2("catch operator_code[%d]__________________________________________________", packet->operate_code);
+    LOG_ERROR2("catch operator_code[%d]__________________________________________________", packet->operate_code);
 }
   return true;
 }
