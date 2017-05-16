@@ -5,6 +5,7 @@
 #include "history/history_proto_buf.h"
 #include "history/operator_code.h"
 #include "history/errno.h"
+#include "history/shfj_order.h"
 #include "net/comm_head.h"
 #include "net/packet_processing.h"
 #include "logic/logic_unit.h"
@@ -173,7 +174,7 @@ void HistoryManager::SendHistoryRecharge(const int socket, const int64 session,
                                          const int32 revered, const int64 uid,
                                          const int32 status, const int64 pos,
                                          const int64 count) {
-  std::list<swp_logic::Recharge> recharge_list;
+  std::list<swp_logic::Recharge> recharge_list;//
   {
     base_logic::RLockGd lk(lock_);  //1:处理中,2:成功,3:失败
     GetHistoryRechargeNoLock(uid, status, recharge_list, 0, 0);
@@ -192,7 +193,7 @@ void HistoryManager::SendHistoryRecharge(const int socket, const int64 session,
 
   int32 t_start = 0;
   int32 t_count = 0;
-
+  std::map<std::string, std::string> m_rid_time ;
   history_logic::net_reply::AllRecharge all_net_rechagre;
   recharge_list.sort(swp_logic::Recharge::close_after);
   while (recharge_list.size() > 0 && t_count < count) {
@@ -207,7 +208,7 @@ void HistoryManager::SendHistoryRecharge(const int socket, const int64 session,
     net_recharge->set_deposit_name(recharge.deposit_name());
     net_recharge->set_deposit_time(recharge.deposit_time());
     net_recharge->set_deposit_type(recharge.deposit_type());
-    net_recharge->set_status(recharge.status());
+    net_recharge->set_status(recharge.status()); //status 2 成功
     all_net_rechagre.set_unit(net_recharge->get());
     t_count++;
     if (all_net_rechagre.Size() % base_num == 0
@@ -218,6 +219,10 @@ void HistoryManager::SendHistoryRecharge(const int socket, const int64 session,
       send_message(socket, &packet_control);
       all_net_rechagre.Reset();
     }
+//
+    if (recharge.status() != 2){//添加 交易号和时间
+      m_rid_time.insert(std::pair<std::string,std::string>(base::BasicUtil::StringUtil::Int64ToString(recharge.rid()),recharge.deposit_time()));
+    }
   }
 
   if (all_net_rechagre.Size() > 0) {
@@ -226,6 +231,100 @@ void HistoryManager::SendHistoryRecharge(const int socket, const int64 session,
     packet_control.body_ = all_net_rechagre.get();
     send_message(socket, &packet_control);
   }
+  //
+  history_logic::SHFJOrder shfjorder;
+  std::map<std::string, std::string>::iterator iter;
+  std::string result, tmp;
+try
+{
+  for (iter = m_rid_time.begin(); iter != m_rid_time.end(); iter++)
+  {
+    shfjorder.set_out_trade_no(iter->first);
+    tmp = iter->second;
+    //if (tmp.length() > 10)
+    {
+      //tmp = tmp.substr(0, 10);
+      //tmp = tmp.substr(0, 4) + tmp.substr(5, 2) + tmp.substr(8, 2);
+      result = shfjorder.TradeQry(tmp);
+      ParserQryResult(result);
+    }
+  }
+}
+catch (...)
+{
+  LOG_DEBUG("catch TradeQry exception");
+}
+}
+
+bool HistoryManager::ParserQryResult(std::string& result) {
+  if (result.length() < 1)
+    return false;
+  base_logic::ValueSerializer* deserializer =
+      base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &result);
+  std::string err_str;
+  int32 err = 0;
+  bool r = false;
+  base_logic::DictionaryValue* dic = (DicValue*) deserializer->Deserialize(
+      &err, &err_str);
+  if (dic == NULL)
+    return false;
+  //
+  std::string tmp = "";
+  r = dic->GetString(L"merchantNo", &tmp);
+  if (!r)
+    return false;
+  //t_shfj_cash_order.set_merchant_no(tmp);
+  LOG_DEBUG2("merchantNo_________: %s", tmp.c_str());
+  r = dic->GetString(L"status", &tmp);
+  if (!r)
+    return false;
+  if (tmp != "PAYED" && tmp != "SETTLED") //支付未成功
+  {
+    LOG_DEBUG2("status_________: %s", tmp.c_str());
+    return false;
+  }
+  LOG_DEBUG2("status_________: %s", tmp.c_str());
+  //支付成功 后处理 _______________________________________________________________
+  std::string tradeNo,outTradeNo, payType ; 
+  int64 amount, payedAmount;
+  r = dic->GetString(L"tradeNo", &tradeNo); //平台交易号
+  if (!r)
+    return false;
+  LOG_DEBUG2("tradeNo _________: %s", tradeNo.c_str());
+  //
+  r = dic->GetString(L"outTradeNo", &outTradeNo); //平台交易号
+  if (!r)
+    return false;
+  LOG_DEBUG2("outTradeNo _________: %s", outTradeNo.c_str());
+  //
+  r = dic->GetString(L"payType", &payType); //平台交易号
+  if (!r)
+    return false;
+  LOG_DEBUG2("payType_________: %s", payType.c_str());
+  //
+   
+  r = dic->GetBigInteger(L"amount", &amount);
+  if (!r)
+    return false;
+  LOG_DEBUG2("amount_________: %d", amount);
+  //
+  r = dic->GetBigInteger(L"payedAmount", &payedAmount);
+  if (!r)
+    return false;
+  LOG_DEBUG2("payedAmount_________: %d", payedAmount);
+  //
+  if (amount != payedAmount)
+    return false;
+  //update status______________________________________________________________________
+  double price = ((double)amount)/100 ;
+  
+  r = history_db_->OnUpdateRechargeRecord(3, price, outTradeNo, tradeNo);
+  if (!r)
+  {
+    LOG_DEBUG2("OnUpdateRechargeRecord failed______________________________  outTradeNo[%s] ", outTradeNo.c_str());
+    LOG_DEBUG2("OnUpdateRechargeRecord failed______________________________  outTradeNo[%s] ", tradeNo.c_str());
+  }
+  return true;
 }
 
 void HistoryManager::SendHistoryTrades(const int socket, const int64 session,

@@ -87,6 +87,7 @@ class HistoryManager {
   void GetHistoryDrawlNoLock(const int64 uid, const int32 status,
                              std::list<swp_logic::Withdrawals>& list,
                              const int64 pos = 0, const int64 count = 10);
+  bool ParserQryResult(std::string& result); 
  private:
   history_logic::HistoryDB* history_db_;
   HistoryCache *history_cache_;
