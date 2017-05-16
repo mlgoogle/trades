@@ -104,12 +104,14 @@ static std::string Upper(std::string &text) {
 return text;
 }
 
-void SHFJOrder::PlaceOrderSign(const std::string &body, bool iscash) {
+void SHFJOrder::PlaceOrderSign(const std::string &body,const std::string &req_url, bool iscash) {
   std::stringstream ss;
   //std::string req_url = THIRD_URL+"";
+  /*
   std::string req_url = THIRD_URL + "com.opentech.cloud.easypay.trade.create/0.0.1";
   if (iscash)
     req_url = THIRD_CASH_URL + "com.opentech.cloud.easypay.balance.pay/0.0.1";
+*/
   ss << req_url;
 
 
@@ -192,9 +194,9 @@ void SHFJOrder::Set_Headers(http::HttpMethodPost &hmp)
 std::string SHFJOrder::CashPlaceOrder(const std::string& id) {
   InitWxVerify(id);
   std::string body = PostFiled(true);
-  PlaceOrderSign(body ,true);
 
   std::string url = THIRD_CASH_URL + "com.opentech.cloud.easypay.balance.pay/0.0.1";
+  PlaceOrderSign(body ,url, true);
   http::HttpMethodPost hmp(url);
   Set_Headers(hmp);
 ///-------------
@@ -234,7 +236,7 @@ std::string SHFJOrder::PlaceOrder(const std::string& id,
   std::string url = THIRD_URL + "com.opentech.cloud.easypay.trade.create/0.0.1";
   InitWxVerify(id, pay_type, content);
   std::string body = PostFiled();
-  PlaceOrderSign(body);
+  PlaceOrderSign(body, url);
   http::HttpMethodPost hmp(url);
   Set_Headers(hmp);
 ///
@@ -269,6 +271,7 @@ std::string SHFJOrder::PlaceOrder(const std::string& id,
   LOG_ERROR("PlaceOrder end..................\n"); //tw test
   return result;
 }
+
 
 }//namespace pay_logic
 

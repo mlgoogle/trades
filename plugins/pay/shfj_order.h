@@ -16,11 +16,17 @@ const std::string T_MD5_KEY = "RPOUDPWHNMJETKCJADHFYQBEMJRVDVHP"; //证书编号
 //const std::string THIRD_CASH_URL = "http://119.23.114.137/native/";
 const std::string THIRD_URL = "https://gw.xzlpay.com/native/";
 const std::string THIRD_CASH_URL = "https://gw.xzlpay.com/native/";
-
+/*
+const std::string T_NOTIFY_URL =
+    "http://139.224.34.22/cgi-bin/flight/pay/v1/third_callback.fcgi";
+const std::string T_CASH_NOTIFY_URL =
+    "http://139.224.34.22/cgi-bin/flight/pay/v1/third_cash_callback.fcgi";
+*/
 const std::string T_NOTIFY_URL =
     "http://122.144.169.217/cgi-bin/flight/pay/v1/third_callback.fcgi";
 const std::string T_CASH_NOTIFY_URL =
     "http://122.144.169.217/cgi-bin/flight/pay/v1/third_cash_callback.fcgi";
+
 
 /*
  */
@@ -73,7 +79,7 @@ class SHFJOrder {
   std::string PlaceOrder(const std::string& id, 
   		const std::string& pay_type, const std::string &content);
   std::string CashPlaceOrder(const std::string& id);
-
+//---------------------------------------------------------------------------------
   inline std::string get_appid() {
     return appid;
   }
@@ -106,7 +112,7 @@ class SHFJOrder {
                     const std::string& content);
 
   void Set_Headers(http::HttpMethodPost &hmp);
-  void PlaceOrderSign(const std::string &body, bool iscash = false);
+  void PlaceOrderSign(const std::string &body,const std::string &req_url, bool iscash = false);
  private:
   //随机字符串，不长于32位
   std::string nonce_str;

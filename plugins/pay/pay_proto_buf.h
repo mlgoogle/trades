@@ -1048,7 +1048,8 @@ class Balance {
 class SHFJPayOrder {
  public:
   SHFJPayOrder()
-      : payment_info_(NULL) {
+      : payment_info_(NULL),
+      value_ (NULL){
   }
 
   ~SHFJPayOrder() {
@@ -1086,7 +1087,8 @@ class SHFJCashOrder {
         transfer_amount_(NULL),
         fee_(NULL),
         pay_no_(NULL),
-        status_(NULL)
+        status_(NULL),
+        value_(NULL)
       {
   }
 

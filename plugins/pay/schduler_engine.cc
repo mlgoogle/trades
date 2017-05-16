@@ -424,7 +424,9 @@ bool PayManager::OnSHFJServer(const int socket, const std::string& appid,
 
   //const std::string r_rt =
    //   "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
-  const std::string r_rt = "{\"returncode\":\"SUCCESS\"}";
+  const std::string r_rt =
+      "<xml><return_code><![CDATA[SUCCEED]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+  //const std::string r_rt = "{\"returncode\":\"SUCCEED\"}";
   send_full(socket, r_rt.c_str(), r_rt.length());
 
   if (r) {
@@ -457,7 +459,7 @@ bool PayManager::OnSHFJCashServer(const int socket,
                                                   status, uid, balance);
 
   const std::string r_rt =
-      "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+      "<xml><return_code><![CDATA[SUCCEED]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
   send_full(socket, r_rt.c_str(), r_rt.length());
 
   if (r) {

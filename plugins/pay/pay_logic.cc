@@ -337,7 +337,9 @@ bool Paylogic::OnSHFJPaySever(struct server* srv, int socket,
   bool r = shfj_pay_sever.set_http_packet(packet_control->body_);
   if (!r) {
     LOG_DEBUG2("packet_length %d",packet->packet_length);
-    const std::string r_rt = "{\"shfj_pay\":\"\"}";
+   // const std::string r_rt = "{\"shfj_pay\":\"\"}";
+    const std::string r_rt =
+      "<xml><return_code><![CDATA[SUCCEED]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
     send_full(socket, r_rt.c_str(), r_rt.length());
     return false;
   }
@@ -389,7 +391,8 @@ bool Paylogic::OnSHFJCashServer(struct server* srv, int socket,
   bool r = shfj_cash_sever.set_http_packet(packet_control->body_);
   if (!r) {
     LOG_DEBUG2("packet_length %d",packet->packet_length);
-    const std::string r_rt = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+    const std::string r_rt =
+      "<xml><return_code><![CDATA[SUCCEED]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
     send_full(socket, r_rt.c_str(), r_rt.length());
     return false;
   }
