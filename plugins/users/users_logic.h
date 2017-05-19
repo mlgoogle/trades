@@ -16,6 +16,8 @@
 
 namespace users_logic {
 
+///
+
 class Userslogic {
  public:
   Userslogic();
@@ -72,12 +74,16 @@ class Userslogic {
 
   bool OnGetVersion(struct server* srv, int socket,
                       struct PacketHead *packet);
+
+  bool OnHeartBeat(struct server* srv, int socket,
+                                struct PacketHead *packet);
  private:
   bool Init();
  private:
   users_logic::UsersDB* user_db_;
 
   manager_schduler::SchdulerEngine* schduler_engine_;
+  //
 };
 }  // namespace history_logic
 

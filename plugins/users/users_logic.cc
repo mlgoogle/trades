@@ -12,6 +12,8 @@
 #include "core/common.h"
 #include "logic/logic_comm.h"
 #include "logic/logic_unit.h"
+//#include "users/storager_kafka.h"
+//#include "users/crawler_task_kafka.h"
 #include "net/errno.h"
 #include <string>
 #include <sstream>
@@ -33,6 +35,7 @@ Userslogic::~Userslogic() {
     delete user_db_;
     user_db_ = NULL;
   }
+
 }
 
 bool Userslogic::Init() {
@@ -54,6 +57,7 @@ bool Userslogic::Init() {
   = (*schduler_engine)();
   if (schduler_engine_ == NULL)
     assert(0);
+
   return true;
 }
 
@@ -91,6 +95,8 @@ bool Userslogic::OnUsersMessage(struct server *srv, const int socket,
 
 try
 {
+
+  schduler_engine_->SetRecvTime(socket); //设置接收数据时间
   switch (packet->operate_code) {
     case R_ACCOUNT_REGISTER: {
       OnRegisterAccount(srv, socket, packet);
@@ -129,6 +135,10 @@ try
       OnGetVersion(srv, socket, packet);
       break;
     }
+    case R_HEART_BEAT:{
+      OnHeartBeat(srv, socket, packet);
+      break;
+    }
     default:
       break;
   }
@@ -165,7 +175,7 @@ bool Userslogic::OnBroadcastClose(struct server *srv, const int socket) {
 
 bool Userslogic::OnIniTimer(struct server *srv) {
   if (srv->add_time_task != NULL) {
-    //srv->add_time_task(srv, "users", TIME_HEARTBEAT_TASK, 30, -1);
+    //srv->add_time_task(srv, "users", TIME_HEARTBEAT_TASK, 300, -1);
   }
   return true;
 }
@@ -173,6 +183,7 @@ bool Userslogic::OnIniTimer(struct server *srv) {
 bool Userslogic::OnTimeout(struct server *srv, char *id, int opcode, int time) {
   switch (opcode) {
     case TIME_HEARTBEAT_TASK: {
+      //schduler_engine_->CheckHeartPacket();
       //LOG_DEBUG2("pwd[%s]___________________id[%s]______________", id, id);
       break;
     }
@@ -209,8 +220,16 @@ bool Userslogic::OnRegisterAccount(struct server* srv, int socket,
 				register_account.device_id(),
 				register_account.member_id());
 				//
-  if (!r || result == 0) {  //用户已经存在
+  if (!r && result == 0) {  //用户已经存在
     send_error(socket, ERROR_TYPE, NO_USER_EXIST, packet->session_id);
+    return false;
+  }
+  if (!r && result == -1) {  //agentid不存在
+    send_error(socket, ERROR_TYPE, NO_AGENT_ID, packet->session_id);
+    return false;
+  }
+  if (!r && result == -2) {  //会员不存在
+    send_error(socket, ERROR_TYPE, NO_MEMBER_ID, packet->session_id);
     return false;
   }
 
@@ -258,11 +277,27 @@ bool Userslogic::OnWXBindAccount(struct server* srv, int socket,
 				wx_bind_account.device_id(),
 				wx_bind_account.member_id());
 				//
-  if (!r || result == 0) {  //用户已经存在
+  if (!r && result == 0) {  //用户已经存在
     send_error(socket, ERROR_TYPE, NO_USER_EXIST, packet->session_id);
     return false;
   }
 
+  if (!r && result == -1) {  //agentid不存在
+    LOG_DEBUG2("packet_length %d_______________ agentid no ____________",packet->packet_length);
+    LOG_DEBUG2("packet_length %d_______________ agentid no ____________",packet->packet_length);
+    LOG_DEBUG2("packet_length %d_______________ agentid no ____________",packet->packet_length);
+    send_error(socket, ERROR_TYPE, NO_AGENT_ID, packet->session_id);
+    return false;
+  }
+  if (!r && result == -2) {  //会员不存在
+    LOG_DEBUG2("packet_length %d_______________ member no ____________",packet->packet_length);
+    LOG_DEBUG2("packet_length %d_______________ member no ____________",packet->packet_length);
+    LOG_DEBUG2("packet_length %d_______________ member no ____________",packet->packet_length);
+    LOG_DEBUG2("packet_length %d_______________ member no ____________",packet->packet_length);
+    LOG_DEBUG2("packet_length %d_______________ member no ____________",packet->packet_length);
+    send_error(socket, ERROR_TYPE, NO_MEMBER_ID, packet->session_id);
+    return false;
+  }
   //返回绑定信息
   users_logic::net_reply::RegisterAccount net_register_account;
   net_register_account.set_result(1);
@@ -410,6 +445,9 @@ bool Userslogic::OnLoginAccount(struct server* srv, int socket,
   userinfo.set_token(token);
   //发送用信息
   SendUserInfo(socket, packet->session_id, S_ACCOUNT_LOGIN, userinfo);
+  //
+
+//
   return true;
 }
 
@@ -501,7 +539,8 @@ bool Userslogic::OnRegisterVerifycode(struct server* srv, int socket,
 
   ////检测号码是否已经注册
   std::string phone = register_vercode.phone();
-  if (register_vercode.type() == 0) //注册
+  int64 t_type = register_vercode.type();
+  if (t_type == 0) //注册
   {
   r =user_db_->CheckAccountExist(phone);
   if (!r) {
@@ -516,7 +555,8 @@ bool Userslogic::OnRegisterVerifycode(struct server* srv, int socket,
   std::stringstream ss;
   ss << SHELL_SMS << " " << phone << " "
       <<rand_code<<" "
-      << 0; //0注册 1登陆 目前脚本中只有为0时的模板是启用的
+      << t_type ;
+      //<< 0; //0注册 1登陆 目前脚本中只有为0时的模板是启用的
   /*std::string sysc = shell_sms + " " + phone + " " +
       base::BasicUtil::StringUtil::Int64ToString(rand_code) + " " +
       base::BasicUtil::StringUtil::Int64ToString(1);*/
@@ -580,6 +620,7 @@ bool Userslogic::OnGetVersion(struct server* srv, int socket,
   }
   struct PacketControl* packet_control = (struct PacketControl*) (packet);
   bool r = get_version.set_http_packet(packet_control->body_);
+
   if (!r) {
     LOG_DEBUG2("packet_length %d",packet->packet_length);
     send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
@@ -606,5 +647,30 @@ bool Userslogic::OnGetVersion(struct server* srv, int socket,
 
   return true;
 }
+
+bool Userslogic::OnHeartBeat(struct server* srv, int socket,
+                                struct PacketHead *packet) {
+/*
+  users_logic::net_request::HeartBeat heartbeat;
+  if (packet->packet_length <= PACKET_HEAD_LENGTH) {
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
+    return false;
+  }
+  struct PacketControl* packet_control = (struct PacketControl*) (packet);
+  bool r = heartbeat.set_http_packet(packet_control->body_);
+  if (!r) {
+    LOG_DEBUG2("packet_length %d",packet->packet_length);
+    send_error(socket, ERROR_TYPE, FORMAT_ERRNO, packet->session_id);
+    return false;
+  }
+/*
+  LOG_DEBUG2("heartbeat____________________packet_length %d",packet->packet_length);
+  LOG_DEBUG2("heartbeat____________________packet_length %d",packet->packet_length);
+  LOG_DEBUG2("heartbeat____________________packet_length %d",packet->packet_length);
+ */ 
+  return true;
+}
+
+
 
 }  // namespace trades_logic

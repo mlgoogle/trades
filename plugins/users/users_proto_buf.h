@@ -33,11 +33,11 @@ class RegisterVerfiycode {
     phone_ = new base_logic::StringValue(phone);
   }
 
-  void set_type(const int32 type) {
+  void set_type(const int64 type) {
     type_ = new base_logic::FundamentalValue(type);
   }
 
-  int32 type() const {
+  int64 type() const {
     int64 type;
     type_->GetAsBigInteger(&type);
     return type;
@@ -54,6 +54,49 @@ class RegisterVerfiycode {
  private:
   base_logic::StringValue* phone_;
   base_logic::FundamentalValue* type_;
+};
+
+
+class HeartBeat{
+ public:
+  HeartBeat()
+      : token_(NULL), uid_(NULL) {
+  }
+
+  ~HeartBeat() {
+    if (token_) {
+      delete token_;
+    }
+    if (uid_) {
+      delete uid_;
+    }
+  }
+
+  void set_token(const std::string& token) {
+    token_ = new base_logic::StringValue(token);
+  }
+
+  void set_uid(const int64 uid) {
+    uid_ = new base_logic::FundamentalValue(uid);
+  }
+
+  int64 uid() const {
+    int64 uid;
+    uid_->GetAsBigInteger(&uid);
+    return uid;
+  }
+
+  const std::string& token() const {
+    std::string token;
+    token_->GetAsString(&token);
+    return token;
+  }
+
+  bool set_http_packet(base_logic::DictionaryValue* value);
+
+ private:
+  base_logic::StringValue* token_;
+  base_logic::FundamentalValue* uid_;
 };
 
 class UserAccount {

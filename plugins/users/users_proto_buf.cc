@@ -37,6 +37,27 @@ bool RegisterVerfiycode::set_http_packet(base_logic::DictionaryValue* value) {
   return true;
 }
 
+bool HeartBeat::set_http_packet(base_logic::DictionaryValue* value) {
+  std::string tmp;
+  bool r = false;
+
+  if (value == NULL)
+    return false;
+
+  r = value->GetString(L"token", &tmp);
+  if (r)
+    set_token(tmp);
+  else
+    return false;
+  int64 temp = 0;
+  r = value->GetBigInteger(L"uid", &temp);
+  if (r)
+    set_uid(temp);
+  else
+    return false;
+
+  return true;
+}
 
 bool TGetVersion::set_http_packet(base_logic::DictionaryValue* value) {
   bool r = false;
