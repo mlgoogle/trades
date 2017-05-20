@@ -105,6 +105,9 @@ schduler_engine.o : ./schduler_engine.cc ./schduler_engine.h
 history_proto_buf.o : ./history_proto_buf.cc ./history_proto_buf.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./history_proto_buf.cc $(INCLUDE_PATHS)
 	
+shfj_order.o : ./shfj_order.cc ./shfj_order.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./shfj_order.cc $(INCLUDE_PATHS)
+
 logic_unit.o :  $(USER_DIR)/logic/logic_unit.cc $(USER_DIR)/logic/logic_unit.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/logic_unit.cc $(INCLUDE_PATHS)
 	
@@ -133,8 +136,8 @@ redis_pool.o :  $(USER_DIR)/storage/redis_pool.cc $(USER_DIR)/storage/redis_pool
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/storage/redis_pool.cc $(INCLUDE_PATHS)
 	
 
-$(PLUGIN) : history_init.o  history_logic.o schduler_engine.o history_proto_buf.o history_db.o history_info.o fcgimodule.o\
+$(PLUGIN) : history_init.o  history_logic.o schduler_engine.o history_proto_buf.o history_db.o shfj_order.o history_info.o fcgimodule.o\
 	swp_infos.o logic_unit.o packet_processing.o data_engine.o data_mysql_engine.o data_redis_engine.o mysql_pool.o redis_pool.o\
 	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/mylib/base/lib/mybase.a $(LIB_DIR)/mylib/third_party/lib/libhiredis.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -ldl -lmysqlclient -lfcgi++ \
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -ldl -lmysqlclient -lcurl -lfcgi++ \
 	$^ -o $@

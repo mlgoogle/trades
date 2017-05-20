@@ -313,6 +313,8 @@ void SendUtils::FreeInstance() {
 struct threadrw_t* SendUtils::socket_lock_ = NULL;
 
 int32 SendUtils::SendFull(int socket, const char *buffer, size_t nbytes) {
+  if (socket == -1)
+    return -1;
   if (NULL == SendUtils::socket_lock_)
      InitThreadrw(&SendUtils::socket_lock_);
   base_logic::WLockGd lk(SendUtils::socket_lock_);

@@ -36,6 +36,8 @@ namespace users_logic {
 #define R_GET_VERSION USERS_TYPE * 1000 + 17
 #define S_GET_VERSION USERS_TYPE * 1000 + 18
 
+#define R_HEART_BEAT USERS_TYPE * 1000 + 19
+#define S_HEART_BEAT USERS_TYPE * 1000 + 20
 }
 
 #endif

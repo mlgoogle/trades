@@ -49,21 +49,25 @@ bool PayManager::OnSHFJCreateCashOrder(const int socket, const int64 session,
   int64 rid = base::SysRadom::GetInstance()->GetRandomID();
 try
 {
-  bool r = SHFJCashOrder(socket, rid, price, rec_bank_name, rec_bra_bank_name, rec_card_no, rec_account_name,shfj_order, r_shfj_cash_order);
+
+
+//数据库操作创建取现订单记录
+//
+  //int status = pay_logic::GetSHFJCashStatus(r_shfj_cash_order.status());  //
+  int status = 0;//
+
+  bool r = pay_db_->OnCreateWithdrawOrder(uid, rid, price, bid, status);
+  if (!r) {
+    send_error(socket, ERROR_TYPE, STOAGE_ORDER_ERROR, session);
+    return r;
+  }
+
+  r = SHFJCashOrder(socket, rid, price, rec_bank_name, rec_bra_bank_name, rec_card_no, rec_account_name,shfj_order, r_shfj_cash_order);
   if (!r) {
     send_error(socket, ERROR_TYPE, THIRD_CASH_ORDER_ERROR, session);
     return false;
   }
 
-//数据库操作创建取现订单记录
-//
-  int status = pay_logic::GetSHFJCashStatus(r_shfj_cash_order.status());  //
-
-  r = pay_db_->OnCreateWithdrawOrder(uid, rid, price, bid, status);
-  if (!r) {
-    send_error(socket, ERROR_TYPE, STOAGE_ORDER_ERROR, session);
-    return r;
-  }
 }
 catch (...)
 {
@@ -424,7 +428,9 @@ bool PayManager::OnSHFJServer(const int socket, const std::string& appid,
 
   //const std::string r_rt =
    //   "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
-  const std::string r_rt = "{\"returncode\":\"SUCCESS\"}";
+  const std::string r_rt =
+      "<xml><return_code><![CDATA[SUCCEED]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+  //const std::string r_rt = "{\"returncode\":\"SUCCEED\"}";
   send_full(socket, r_rt.c_str(), r_rt.length());
 
   if (r) {
@@ -457,7 +463,7 @@ bool PayManager::OnSHFJCashServer(const int socket,
                                                   status, uid, balance);
 
   const std::string r_rt =
-      "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+      "<xml><return_code><![CDATA[SUCCEED]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
   send_full(socket, r_rt.c_str(), r_rt.length());
 
   if (r) {

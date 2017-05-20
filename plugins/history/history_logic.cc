@@ -223,6 +223,9 @@ bool Historylogic::OnHistoryRecharge(struct server* srv, int socket,
       socket, packet->session_id, packet->reserved, history_recharge.id(),
       history_recharge.status(), history_recharge.start(),
       history_recharge.count());
+//获取状态为处理中的列表
+  
+//
   return true;
 }
 

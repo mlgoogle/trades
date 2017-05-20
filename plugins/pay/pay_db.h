@@ -12,6 +12,7 @@
 #include "basic/basictypes.h"
 #include "logic/base_values.h"
 #include "basic/scoped_ptr.h"
+//#include "thread/base_thread_lock.h"
 
 namespace pay_logic {
 
@@ -43,6 +44,7 @@ class PayDB {
   static void CallUpdateCallBackRechargeOrder(void* param, base_logic::Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
+//  threadrw_t*                                   pay_callback_; 
 };
 
 }  // namespace history_logic

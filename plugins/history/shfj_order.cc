@@ -1,7 +1,7 @@
 //  Copyright (c) 2017-2018 The SWP Authors. All rights reserved.
 //  Created on: 2017年1月12日 Author: kerry
 
-#include "pay/shfj_order.h"
+#include "history/shfj_order.h"
 
 #include <iostream>
 #include <sstream>
@@ -9,7 +9,7 @@
 #include "logic/logic_unit.h"
 #include "logic/logic_comm.h"
 
-namespace pay_logic {
+namespace history_logic {
 ///---
 int32 GetSHFJCashStatus(const std::string &status)
 {
@@ -26,9 +26,6 @@ int32 GetSHFJCashStatus(const std::string &status)
 }
 const std::string PASSWORD = "hsx888";
 SHFJOrder::SHFJOrder() {
-  total_fee = 0;
-  fee = 0;
-  transfer_amount = 0;  
 }
 
 SHFJOrder::~SHFJOrder() {
@@ -74,25 +71,10 @@ std::string UrlDecode(const std::string& szToDecode)
   return result;
 }   
 
-
-void SHFJOrder::InitWxVerify(const std::string& id, 
-                           const std::string& p_type, 
-                           const std::string& ctent) {
-  appid = id;
-  //mch_id = m_id;
-  mch_id = T_MCH_ID;
-  notify_url = T_NOTIFY_URL;
-  pay_type = p_type;
-  content = ctent;
-//
-  nonce_str = logic::SomeUtils::RandomString(32);
-}
-
-void SHFJOrder::InitWxVerify(const std::string& id) {
+void SHFJOrder::InitWxVerify() {
 //cash use
-  appid = id;
   mch_id = T_MCH_ID;
-  notify_url = T_CASH_NOTIFY_URL;
+  //notify_url = T_CASH_NOTIFY_URL;
 }
 
 static std::string Upper(std::string &text) {
@@ -114,7 +96,6 @@ void SHFJOrder::PlaceOrderSign(const std::string &body,const std::string &req_ur
 */
   ss << req_url;
 
-
   ss << "&x-oapi-pv=0.0.1"
    << "&x-oapi-sdkv=0.0.1/c" 
    << "&x-oapi-sk=" << T_APP_KEY	  //证书key
@@ -134,39 +115,6 @@ void SHFJOrder::PlaceOrderSign(const std::string &body,const std::string &req_ur
 /*
 */
 
-std::string SHFJOrder::PostFiled(bool iscash) {
-  base_logic::DictionaryValue dic;
-
-  dic.SetBigInteger(L"amount", total_fee);
-  dic.SetString(L"callbackURL", notify_url);
-  if (iscash)
-  {
-    dic.SetString(L"merchantNo", mch_id);
-    dic.SetString(L"outPayNo", out_trade_no);
-    dic.SetString(L"payPassword", PASSWORD);
-    dic.SetString(L"receiverAccountName", rec_account_name);
-    dic.SetString(L"receiverBankName", rec_bank_name);
-    dic.SetString(L"receiverBranchBankName", rec_branch_bank_name);
-    dic.SetString(L"receiverCardNo", rec_card_no);
-  }
-  else
-  {
-    dic.SetString(L"content", content);
-    dic.SetString(L"merchantNo", mch_id);
-    dic.SetString(L"outTradeNo", out_trade_no);
-    dic.SetString(L"payType", pay_type);
-    dic.SetString(L"wechatOpenId", wechat_openid);
-    dic.SetString(L"wechatAppId", wechat_appid);
-  }
-
-  std::string filed = "";
-  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &filed);
-  serializer->Serialize(dic);
-  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
-                                                serializer);
-  return filed;
-}
 void SHFJOrder::Set_Headers(http::HttpMethodPost &hmp)
 {
   std::string headers = "x-oapi-pv: 0.0.1";
@@ -191,12 +139,29 @@ void SHFJOrder::Set_Headers(http::HttpMethodPost &hmp)
   hmp.SetHeaders(headers); 
 }
 
-std::string SHFJOrder::CashPlaceOrder(const std::string& id) {
-  InitWxVerify(id);
-  std::string body = PostFiled(true);
 
-  std::string url = THIRD_CASH_URL + "com.opentech.cloud.easypay.balance.pay/0.0.1";
-  PlaceOrderSign(body ,url, true);
+std::string SHFJOrder::QryPostFiled(std::string &date) {
+  base_logic::DictionaryValue dic;
+
+  dic.SetString(L"merchantNo", mch_id);
+  dic.SetString(L"outTradeNo", out_trade_no);
+  dic.SetString(L"date", date);
+
+  std::string filed = "";
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &filed);
+  serializer->Serialize(dic);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return filed;
+}
+
+std::string SHFJOrder::TradeQry(std::string& date) {
+  InitWxVerify();
+  std::string body = QryPostFiled(date);
+  std::string url = THIRD_URL + "com.opentech.cloud.easypay.trade.query/0.0.1";
+  PlaceOrderSign(body , url, true); //签名
+
   http::HttpMethodPost hmp(url);
   Set_Headers(hmp);
 ///-------------
@@ -219,58 +184,15 @@ std::string SHFJOrder::CashPlaceOrder(const std::string& id) {
     LOG_DEBUG2("msg_value_____[%s]", UrlDecode((*msg_iter)).c_str());
 
   }
-/////
-//
 //----------------
   std::string result;
   hmp.GetContent(result);
   //LOG(INFO)<< "http post result:" << result;
   LOG_DEBUG2("http post result: %s", result.c_str());
-  return result;
-}
-
-std::string SHFJOrder::PlaceOrder(const std::string& id, 
-                                const std::string& pay_type,
-                                const std::string& content) {
-  LOG_ERROR("PlaceOrder start..................\n"); //tw test
-  std::string url = THIRD_URL + "com.opentech.cloud.easypay.trade.create/0.0.1";
-  InitWxVerify(id, pay_type, content);
-  std::string body = PostFiled();
-  PlaceOrderSign(body, url);
-  http::HttpMethodPost hmp(url);
-  Set_Headers(hmp);
-///
-  //hmp.Post(PostFiled().c_str());
-  hmp.Post(body.c_str());
-  std::string result;
-  hmp.GetContent(result);
-
-////get header message
-  std::string err_key = "x-oapi-error-code";
-  MIG_VALUE err_value, mes_value;
   
-  hmp.GetHeader(err_key, err_value);
-  MIG_VALUE::iterator iter, msg_iter;
-  for (iter = err_value.begin(); iter != err_value.end(); iter++)
-    LOG_DEBUG2("err_value_____[%s]", iter->c_str());
-
-  std::string msg_key = "x-oapi-msg";
-  hmp.GetHeader(msg_key, mes_value);
-
-  for (msg_iter = mes_value.begin(); msg_iter != mes_value.end(); msg_iter ++)
-  {
-    LOG_DEBUG2("msg_value_____[%s]", msg_iter->c_str());
-    LOG_DEBUG2("msg_value_____[%s]", UrlDecode((*msg_iter)).c_str());
-
-  }
-/////
-
-  //LOG(INFO)<< "http post result:" << result;
-  LOG_DEBUG2("http post result: %s", result.c_str());
-  LOG_ERROR2("PlaceOrder end.......result[%s]...........\n", result.c_str()); //tw test
-  LOG_ERROR("PlaceOrder end..................\n"); //tw test
   return result;
 }
+
 
 
 }//namespace pay_logic

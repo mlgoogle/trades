@@ -25,6 +25,7 @@ class HistoryDB {
   bool OnHistroyTradesRecord(std::list<swp_logic::TradesPosition>* list);
 
   bool OnHistroyRechargeRecord(std::list<swp_logic::Recharge>* list);
+  bool OnUpdateRechargeRecord(const int32, const double amount, const std::string &rid, const std::string &transcation_id);
 
   bool OnHistroyWithDraw(std::list<swp_logic::Withdrawals>* list);
 

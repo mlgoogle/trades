@@ -18,8 +18,9 @@ THIRD_PATH = $(LIB_DIR)/mylib/public
 
 CUSTOM_THIRD_PATH = $(LIB_DIR)/mylib/third_party
 
-LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
+LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql -L/$(LIB_DIR)/mylib/third_party/lib
 
+#include $(CUSTOM_THIRD_PATH)/librdkafka/mklove/Makefile.base
 # Flags passed to the preprocessor.
 CPPFLAGS += -isystem -shared -fPIC -D_DB_POOL_ -D_DEBUG -DUSR_LOG_MSG\
 	-D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG\
@@ -44,6 +45,7 @@ INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
 				-I/usr/include/mysql\
 				-I$(USER_DIR)\
 				-I$(CUSTOM_THIRD_PATH)/hiredis\
+				-I$(CUSTOM_THIRD_PATH)/librdkafka/src\
 				-I$(CUSTOM_THIRD_PATH)\
 				-I$(LIB_DIR)/mylib/base\
 				-I../\
@@ -104,6 +106,12 @@ schduler_engine.o : ./schduler_engine.cc ./schduler_engine.h
 	
 users_proto_buf.o : ./users_proto_buf.cc ./users_proto_buf.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./users_proto_buf.cc $(INCLUDE_PATHS)
+
+#crawler_task_kafka.o :  ./crawler_task_kafka.cc ./crawler_task_kafka.h
+#	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./crawler_task_kafka.cc $(INCLUDE_PATHS)
+
+#storager_kafka.o :  ./storager_kafka.cc ./storager_kafka.h
+	#$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./storager_kafka.cc $(INCLUDE_PATHS)
 	
 logic_unit.o :  $(USER_DIR)/logic/logic_unit.cc $(USER_DIR)/logic/logic_unit.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/logic_unit.cc $(INCLUDE_PATHS)
@@ -132,9 +140,11 @@ mysql_pool.o :  $(USER_DIR)/storage/mysql_pool.cc $(USER_DIR)/storage/mysql_pool
 redis_pool.o :  $(USER_DIR)/storage/redis_pool.cc $(USER_DIR)/storage/redis_pool.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/storage/redis_pool.cc $(INCLUDE_PATHS)
 	
-
-$(PLUGIN) : users_init.o  users_logic.o users_db.o users_proto_buf.o fcgimodule.o\
+#$(CUSTOM_THIRD_PATH)/librdkafka/librdkafka.a $(CUSTOM_THIRD_PATH)/lib/libbreakpad_client.a $(CUSTOM_THIRD_PATH)/lib/libbreakpad.a $(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/mylib/base/lib/mybase.a $(LIB_DIR)/mylib/third_party/lib/libhiredis.a
+#
+$(PLUGIN) : users_init.o  users_logic.o users_db.o users_proto_buf.o fcgimodule.o \
 	swp_infos.o logic_unit.o packet_processing.o data_engine.o data_mysql_engine.o data_redis_engine.o mysql_pool.o redis_pool.o\
-	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/mylib/base/lib/mybase.a $(LIB_DIR)/mylib/third_party/lib/libhiredis.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -ldl -lmysqlclient -lfcgi++ \
+	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/mylib/base/lib/mybase.a $(LIB_DIR)/mylib/third_party/lib/libhiredis.a\
+        $(CUSTOM_THIRD_PATH)/lib/librdkafka.a 
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -ldl -lmysqlclient -lstdc++ -lfcgi++ \
 	$^ -o $@

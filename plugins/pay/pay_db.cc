@@ -10,6 +10,8 @@ namespace pay_logic {
 PayDB::PayDB(config::FileConfig* config) {
   mysql_engine_ = base_logic::DataEngine::Create(MYSQL_TYPE);
   mysql_engine_->InitParam(config->mysql_db_list_);
+  //InitThreadrw(&pay_callback_);
+
 }
 
 PayDB::~PayDB() {
@@ -17,6 +19,7 @@ PayDB::~PayDB() {
     delete mysql_engine_;
     mysql_engine_ = NULL;
   }
+  //DeinitThreadrw(pay_callback_);
 }
 
 bool PayDB::OnUpdateRechargeOrder(const int64 uid, const int64 rid,
@@ -54,6 +57,7 @@ bool PayDB::OnUpdateCallBackRechargeOrder(const int64 rid, const double price,
   int64 bigr_type = 0;
   if (astatus == 1) //成功
     bigr_type = 3;
+  //if (astatus == 2); //失败
   else
     bigr_type = 4;
   //`proc_UpdateCallBackRechargeOrder`(in i_rid bigint,in i_price double,in i_status int,in i_transaction_id varchar(128))
@@ -63,8 +67,13 @@ bool PayDB::OnUpdateCallBackRechargeOrder(const int64 rid, const double price,
       + base::BasicUtil::StringUtil::Int64ToString(bigr_type) + ",'"
       + transaction_id + "'" + ");";
   dict->SetString(L"sql", sql);
+//lock
+{ 
+  //base_logic::WLockGd lk(pay_callback_); 
   r = mysql_engine_->ReadData(0, (base_logic::Value *) (dict),
                               CallUpdateCallBackRechargeOrder);
+}
+//unlock
 
   if (!r)
     return false;

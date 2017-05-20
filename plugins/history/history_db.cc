@@ -150,6 +150,32 @@ bool HistoryDB::OnHistroyRechargeRecord(std::list<swp_logic::Recharge>* list) {
   return true;
 }
 
+
+bool HistoryDB::OnUpdateRechargeRecord(const int32 status, const double amount, const std::string &rid, const std::string &transcation_id){
+  bool r = false;
+  base_logic::DictionaryValue* dict = new base_logic::DictionaryValue();
+
+  std::string sql;
+  sql = "call proc_UpdateCallBackRechargeOrder("
+      + rid + "," 
+      + base::BasicUtil::StringUtil::DoubleToString(amount) + "," 
+      + base::BasicUtil::StringUtil::Int64ToString(status) + ",'"
+      + transcation_id + "'" + ");";
+  
+  //base_logic::ListValue *listvalue;
+  dict->SetString(L"sql", sql);
+  r = mysql_engine_->ReadData(0, (base_logic::Value *) (dict), NULL);
+  //if (!r)
+    //return false;
+  //dict->GetList(L"resultvalue", &listvalue);
+
+  if (dict) {
+    delete dict;
+    dict = NULL;
+  }
+  return true;
+}
+
 bool HistoryDB::OnHistroyTradesRecord(
     std::list<swp_logic::TradesPosition>* list) {
   bool r = false;

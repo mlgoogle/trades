@@ -6,7 +6,10 @@ if [ $3 -eq 0 ];then
   TEMP_CODE="SMS_64420047"      #注册账号
 fi
 if [ $3 -eq 1 ];then
-  TEMP_CODE="SMS_14251903"     #验证码登录
+  TEMP_CODE="SMS_66920063"     #验证码登录
+fi
+if [ $3 -eq 2 ];then
+  TEMP_CODE="SMS_67176467"     #微信绑定
 fi
 PARAMS="{\"no\":\"$2\"}" #模板参数（json格式）
 
