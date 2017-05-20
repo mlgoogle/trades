@@ -49,21 +49,25 @@ bool PayManager::OnSHFJCreateCashOrder(const int socket, const int64 session,
   int64 rid = base::SysRadom::GetInstance()->GetRandomID();
 try
 {
-  bool r = SHFJCashOrder(socket, rid, price, rec_bank_name, rec_bra_bank_name, rec_card_no, rec_account_name,shfj_order, r_shfj_cash_order);
+
+
+//数据库操作创建取现订单记录
+//
+  //int status = pay_logic::GetSHFJCashStatus(r_shfj_cash_order.status());  //
+  int status = 0;//
+
+  bool r = pay_db_->OnCreateWithdrawOrder(uid, rid, price, bid, status);
+  if (!r) {
+    send_error(socket, ERROR_TYPE, STOAGE_ORDER_ERROR, session);
+    return r;
+  }
+
+  r = SHFJCashOrder(socket, rid, price, rec_bank_name, rec_bra_bank_name, rec_card_no, rec_account_name,shfj_order, r_shfj_cash_order);
   if (!r) {
     send_error(socket, ERROR_TYPE, THIRD_CASH_ORDER_ERROR, session);
     return false;
   }
 
-//数据库操作创建取现订单记录
-//
-  int status = pay_logic::GetSHFJCashStatus(r_shfj_cash_order.status());  //
-
-  r = pay_db_->OnCreateWithdrawOrder(uid, rid, price, bid, status);
-  if (!r) {
-    send_error(socket, ERROR_TYPE, STOAGE_ORDER_ERROR, session);
-    return r;
-  }
 }
 catch (...)
 {

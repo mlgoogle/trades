@@ -92,6 +92,7 @@ bool Paylogic::OnPayMessage(struct server *srv, const int socket,
 	
 try
 {
+  schduler_engine_->SetRecvTime(socket); //设置接收数据时间
   switch (packet->operate_code) {
     case R_WEIXIN_PAY: {
       OnWXPayOrder(srv, socket, packet);
